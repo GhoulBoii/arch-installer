@@ -1,4 +1,4 @@
-#!/usr/bin/env  bash 
+#!/usr/bin/env bash 
 
 # Part 1: Getting Partitions Ready
 
