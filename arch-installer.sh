@@ -2,7 +2,6 @@
 
 # Part 1: Getting Partitions Ready
 
-SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 echo "GhoulBoi's Arch Installer"
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
 pacman --noconfirm -Sy archlinux-keyring 
@@ -29,12 +28,10 @@ case $bios in
 esac 
 pacstrap /mnt base base-devel linux-zen linux-firmware intel-ucode 
 genfstab -U /mnt >> /mnt/etc/fstab
-sed '1,/^#Part 2$/d' `basename $0` > /mnt/arch_install2.sh
-chmod +x /mnt/arch_install2.sh
-arch-chroot /mnt ./arch_install2.sh
 
 # Part 2: Users and Base System
 
+arch-chroot /mnt /bin/bash <<EOF
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
 gawk -i inplace '$0=="#[multilib]"{c=2} c&&c--{sub(/#/,"")} 1' /etc/pacman.conf 
 ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
@@ -46,8 +43,16 @@ echo $hostname > /etc/hostname
 echo "127.0.0.1 localhost" >> /etc/hosts
 echo "::1       localhost" >> /etc/hosts
 echo "127.0.1.1 $hostname.localdomain $hostname" >> /etc/hosts
-mkinitcpio -P
 passwd
 pacman -S --no-confirm grub os-prober networkmanager reflector linux-headers xdg-user-dirs xdg-utils pipewire pipewire-pulse openssh tlp \
-  virt-manager qemu virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g
-read -P    
+  virt-manager qemu virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g tlp
+grub-install --target=i386-pc $drive
+grub-mkconfig -o /boot/grub/grub.cfg
+
+systemctl enable NetworkManager 
+systemctl enable tlp
+systemctl enable reflector.timer
+useradd -m ghoul
+passwd ghoul
+usermod -aG libvirt wheel 
+EOF
