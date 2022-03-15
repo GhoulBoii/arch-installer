@@ -13,6 +13,7 @@ read -p "Enter the Linux Partition (Ex. - /dev/sda2): " linux
 read -p "Enter SWAP partition (Enter \"n\" if no SWAP): " swapcreation
 read -p "Enter EFI partition (Enter \"n\" if using BIOS): " bios
 read -p "Enter the hostname: " hostname
+read -p "Enter username: " username
 mkfs.btrfs -L Linux $linux 
 mount $linux /mnt
 case $swapcreation in
@@ -26,11 +27,12 @@ case $bios in
     mkfs.fat -F 32 $bios
     ;;
 esac 
-pacstrap /mnt base base-devel linux-zen linux-firmware intel-ucode 
+pacstrap /mnt base base-devel linux-zen linux-firmware btrfs-progs intel-ucode 
 genfstab -U /mnt >> /mnt/etc/fstab
 
 # Part 2: Users and Base System
 
+printf '\033c'
 arch-chroot /mnt /bin/bash <<EOF
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
 gawk -i inplace '$0=="#[multilib]"{c=2} c&&c--{sub(/#/,"")} 1' /etc/pacman.conf 
@@ -52,7 +54,8 @@ grub-mkconfig -o /boot/grub/grub.cfg
 systemctl enable NetworkManager 
 systemctl enable tlp
 systemctl enable reflector.timer
-useradd -m ghoul
-passwd ghoul
-usermod -aG libvirt wheel 
+useradd -mG libvirt wheel -s /bin/zsh $username
+passwd $username 
+sed '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /etc/sudoers
+
 EOF
