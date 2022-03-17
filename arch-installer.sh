@@ -1,5 +1,4 @@
 #!/usr/bin/env bash 
-
 # Part 1: Getting Partitions Ready
 
 echo "GhoulBoi's Arch Installer"
@@ -25,6 +24,8 @@ esac
 case $bios in
   /dev/*)
     mkfs.fat -F 32 $bios
+    mdkir /mnt/boot
+    mount $bios /mnt/boot
     ;;
 esac 
 pacstrap /mnt base base-devel linux-zen linux-firmware btrfs-progs intel-ucode 
@@ -48,14 +49,18 @@ echo "127.0.1.1 $hostname.localdomain $hostname" >> /etc/hosts
 passwd
 pacman -S --no-confirm grub os-prober networkmanager reflector linux-headers xdg-user-dirs xdg-utils pipewire pipewire-pulse openssh tlp \
   virt-manager qemu virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g tlp
-grub-install --target=i386-pc $drive
-grub-mkconfig -o /boot/grub/grub.cfg
-
+case $bios in
+     /dev/*)
+        grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+      n)
+        grub-install --target=i386-pc $drive
+        grub-mkconfig -o /boot/grub/grub.cfg
+    ;;
+esac
 systemctl enable NetworkManager 
 systemctl enable tlp
 systemctl enable reflector.timer
 useradd -mG libvirt wheel -s /bin/zsh $username
 passwd $username 
 sed '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /etc/sudoers
-
 EOF
