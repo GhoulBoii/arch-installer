@@ -36,7 +36,10 @@ genfstab -U /mnt >> /mnt/etc/fstab
 printf '\033c'
 arch-chroot /mnt /bin/bash <<EOF
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
-gawk -i inplace '$0=="#[multilib]"{c=2} c&&c--{sub(/#/,"")} 1' /etc/pacman.conf 
+multilibLine=$(grep -n "\[multilib\]" /etc/pacman.conf | cut -d":" -f1)
+let "multilibIncludeLine = $multilibLine + 1"
+sed -i "${multilibLine}s|#||" /etc/pacman.conf
+sed -i "${multilibIncludeLine}s|#||" /etc/pacman.conf
 ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
 hwclock --systohc
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
@@ -47,7 +50,7 @@ echo "127.0.0.1 localhost" >> /etc/hosts
 echo "::1       localhost" >> /etc/hosts
 echo "127.0.1.1 $hostname.localdomain $hostname" >> /etc/hosts
 passwd
-pacman -S --no-confirm grub os-prober networkmanager reflector linux-headers xdg-user-dirs xdg-utils pipewire pipewire-pulse openssh tlp \
+pacman -Sy --no-confirm grub os-prober networkmanager reflector linux-headers xdg-user-dirs xdg-utils pipewire pipewire-pulse openssh tlp \
   virt-manager qemu virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g tlp
 case $bios in
      /dev/*)
