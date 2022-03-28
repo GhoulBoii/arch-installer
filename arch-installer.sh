@@ -44,8 +44,9 @@ echo $hostname > /mnt/etc/hostname
 echo "127.0.0.1 localhost" >> /mnt/etc/hosts
 echo "::1       localhost" >> /mnt/etc/hosts
 echo "127.0.1.1 $hostname.localdomain $hostname" >> /etc/hosts
+echo "Enter your root password: "
 arch-chroot /mnt passwd
-pacman -Sy --no-confirm grub os-prober networkmanager reflector linux-headers xdg-user-dirs xdg-utils pipewire pipewire-pulse openssh tlp \
+pacman -Sy --noconfirm grub os-prober networkmanager reflector linux-headers xdg-user-dirs xdg-utils pipewire pipewire-pulse openssh tlp \
   virt-manager qemu virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g tlp
 case $bios in
      /dev/*)
