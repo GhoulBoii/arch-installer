@@ -34,36 +34,31 @@ genfstab -U /mnt >> /mnt/etc/fstab
 # Part 2: Users and Base System
 
 printf '\033c'
-arch-chroot /mnt /bin/bash <<EOF
-sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
-multilibLine=$(grep -n "\[multilib\]" /etc/pacman.conf | cut -d":" -f1)
-let "multilibIncludeLine = $multilibLine + 1"
-sed -i "${multilibLine}s|#||" /etc/pacman.conf
-sed -i "${multilibIncludeLine}s|#||" /etc/pacman.conf
-ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
-hwclock --systohc
-echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
-locale-gen
+sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /mnt/etc/pacman.conf
+ln -sf /usr/share/zoneinfo/Asia/Kolkata /mnt/etc/localtime
+arch-chroot /mnt hwclock --systohc
+echo "en_US.UTF-8 UTF-8" >> /mnt/etc/locale.gen
+arch-chroot /mnt locale-gen
 echo "LANG=en_US.UTF-8" >> /etc/locale.conf
-echo $hostname > /etc/hostname
-echo "127.0.0.1 localhost" >> /etc/hosts
-echo "::1       localhost" >> /etc/hosts
+echo $hostname > /mnt/etc/hostname
+echo "127.0.0.1 localhost" >> /mnt/etc/hosts
+echo "::1       localhost" >> /mnt/etc/hosts
 echo "127.0.1.1 $hostname.localdomain $hostname" >> /etc/hosts
-passwd
+arch-chroot /mnt passwd
 pacman -Sy --no-confirm grub os-prober networkmanager reflector linux-headers xdg-user-dirs xdg-utils pipewire pipewire-pulse openssh tlp \
   virt-manager qemu virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g tlp
 case $bios in
      /dev/*)
-        grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+        arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+    ;;
       n)
-        grub-install --target=i386-pc $drive
-        grub-mkconfig -o /boot/grub/grub.cfg
+        arch-chroot /mnt grub-install --target=i386-pc $drive
+        arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
     ;;
 esac
-systemctl enable NetworkManager 
-systemctl enable tlp
-systemctl enable reflector.timer
-useradd -mG libvirt wheel -s /bin/zsh $username
-passwd $username 
-sed '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /etc/sudoers
-EOF
+arch-chroot /mnt systemctl enable NetworkManager
+arch-chroot /mnt systemctl enable tlp
+arch-chroot /mnt systemctl enable reflector.timer
+archroot /mnt useradd -mG libvirt wheel -s /bin/zsh $username
+arch-chroot /mnt passwd $username
+sed '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
