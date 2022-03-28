@@ -13,7 +13,7 @@ read -p "Enter SWAP partition (Enter \"n\" if no SWAP): " swapcreation
 read -p "Enter EFI partition (Enter \"n\" if using BIOS): " bios
 read -p "Enter the hostname: " hostname
 read -p "Enter username: " username
-mkfs.btrfs -L Linux $linux 
+mkfs.btrfs -fL Linux $linux
 mount $linux /mnt
 case $swapcreation in
   /dev/*)
@@ -46,7 +46,7 @@ echo "::1       localhost" >> /mnt/etc/hosts
 echo "127.0.1.1 $hostname.localdomain $hostname" >> /etc/hosts
 echo "Enter your root password: "
 arch-chroot /mnt passwd
-pacman -Sy --noconfirm grub os-prober networkmanager reflector linux-headers xdg-user-dirs xdg-utils pipewire pipewire-pulse openssh tlp \
+arch-chroot /mnt pacman -Sy --noconfirm grub os-prober networkmanager reflector linux-headers xdg-user-dirs xdg-utils pipewire pipewire-pulse openssh tlp \
   virt-manager qemu virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g tlp
 case $bios in
      /dev/*)
