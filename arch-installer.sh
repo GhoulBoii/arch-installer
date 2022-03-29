@@ -39,11 +39,11 @@ ln -sf /usr/share/zoneinfo/Asia/Kolkata /mnt/etc/localtime
 arch-chroot /mnt hwclock --systohc
 echo "en_US.UTF-8 UTF-8" >> /mnt/etc/locale.gen
 arch-chroot /mnt locale-gen
-echo "LANG=en_US.UTF-8" >> /etc/locale.conf
+echo "LANG=en_US.UTF-8" >> /mnt/etc/locale.conf
 echo $hostname > /mnt/etc/hostname
 echo "127.0.0.1 localhost" >> /mnt/etc/hosts
 echo "::1       localhost" >> /mnt/etc/hosts
-echo "127.0.1.1 $hostname.localdomain $hostname" >> /etc/hosts
+echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
 echo "Enter your root password: "
 arch-chroot /mnt passwd
 arch-chroot /mnt pacman -Sy --noconfirm grub os-prober networkmanager reflector linux-headers xdg-user-dirs xdg-utils pipewire pipewire-pulse openssh tlp \
@@ -60,6 +60,6 @@ esac
 arch-chroot /mnt systemctl enable NetworkManager
 arch-chroot /mnt systemctl enable tlp
 arch-chroot /mnt systemctl enable reflector.timer
-archroot /mnt useradd -mG libvirt wheel -s /bin/zsh $username
+archroot /mnt useradd -mG libvirt wheel $username
 arch-chroot /mnt passwd $username
-sed '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
+sed -i '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
