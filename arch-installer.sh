@@ -50,7 +50,7 @@ echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
 echo "Enter your root password: "
 arch-chroot /mnt passwd
 arch-chroot /mnt pacman -Sy --noconfirm grub os-prober networkmanager reflector linux-headers xdg-user-dirs xdg-utils pipewire pipewire-pulse openssh tlp \
-  virt-manager qemu virt-viewer libvirt dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g tlp zsh git neovim
+  virt-manager qemu virt-viewer libvirt dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g tlp zsh git neovim rsync
 case $bios in
      /dev/*)
         arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
@@ -69,18 +69,22 @@ sed -i '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
 # Part 3: Graphical Interface
 
 clear
-arch-chroot /mnt su $username
-arch-chroot /mnt cd $HOME
-arch-chroot /mnt git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
-arch-chroot /mnt sudo make -C ~/.local/src/dwm install
-arch-chroot /mnt git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
-arch-chroot /mnt sudo make -C ~/.local/src/dmenu install
-arch-chroot /mnt git clone --depth=1 https://github.com/Jguer/yay ~/.local/src/yay
-arch-chroot /mnt cd ~/.local/src/yay
-arch-chroot /mnt makepkg -si
-arch-chroot /mnt rm -rf ~/.local/src/yay
-arch-chroot /mnt cd
-arch-chroot /mnt ln -sf ~/.config/shell/profile ~/.zprofile
-arch-chroot /mnt alias config="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
-arch-chroot /mnt config config --local status.showUntrackedFiles no
+arch-chroot /mnt sudo -i -u ghoul bash <<EOF
+cd ~
+git clone --seperate-git-dir=$HOME=.dotfiles https://github.com/ghoulboii/dotfiles.git tmpdotfiles
+rsync --recursive --verbose --exclude '.git' tmpdotfiles/ ~/
+rm -rf tmpdotfiles
+git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
+sudo make -C ~/.local/src/dwm install
+git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
+sudo make -C ~/.local/src/dmenu install
+git clone --depth=1 https://github.com/Jguer/yay ~/.local/src/yay
+cd ~/.local/src/yay
+makepkg --noconfirm -si
+cd ~
+rm -rf ~/.local/src/yay
+ln -sf ~/.config/shell/profile ~/.zprofile
+alias config="/usr/bin/git --git-dir=~/.dotfiles/ --work-tree=~"
+config config --local status.showUntrackedFiles no
+EOF
 exit
