@@ -50,7 +50,7 @@ echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
 echo "Enter your root password: "
 arch-chroot /mnt passwd
 arch-chroot /mnt pacman -Sy --noconfirm grub os-prober networkmanager reflector linux-headers xdg-user-dirs xdg-utils pipewire pipewire-pulse openssh tlp \
-  virt-manager qemu virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g tlp zsh git
+  virt-manager qemu virt-viewer libvirt dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g tlp zsh git neovim
 case $bios in
      /dev/*)
         arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
@@ -61,7 +61,8 @@ case $bios in
     ;;
 esac
 arch-chroot /mnt systemctl enable NetworkManager tlp reflector.timer
-arch-chroot /mnt useradd -mG libvirt wheel -s /bin/zsh $username
+arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
+arch-chroot /mnt usermod -aG libvirt $username
 arch-chroot /mnt passwd $username
 sed -i '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
 
@@ -81,7 +82,7 @@ makepkg -si
 rm -rf ~/.local/src/yay
 cd
 ln -sf ~/.config/shell/profile ~/.zprofile
-alias config="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
+alias config='	config="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 config config --local status.showUntrackedFiles no
 EOF
 exit
