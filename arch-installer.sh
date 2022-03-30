@@ -50,7 +50,7 @@ echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
 echo "Enter your root password: "
 arch-chroot /mnt passwd
 arch-chroot /mnt pacman -Sy --noconfirm grub os-prober networkmanager reflector linux-headers xdg-user-dirs xdg-utils pipewire pipewire-pulse openssh tlp \
-  virt-manager qemu virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g tlp zsh zsh-fast-syntax-highlighting
+  virt-manager qemu virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g tlp zsh
 case $bios in
      /dev/*)
         arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
@@ -61,13 +61,14 @@ case $bios in
     ;;
 esac
 arch-chroot /mnt systemctl enable NetworkManager tlp reflector.timer
-archroot /mnt useradd -mG libvirt wheel -s /bin/zsh $username
+arch-chroot /mnt useradd -mG libvirt wheel -s /bin/zsh $username
 arch-chroot /mnt passwd $username
 sed -i '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
 
 # Part 3: Graphical Interface
 
 clear
+arch-chroot /mnt /bin/bash <<EOF
 cd $HOME
 git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
 sudo make -C ~/.local/src/dwm install
@@ -80,4 +81,5 @@ rm -rf ~/.local/src/yay
 cd
 ln -sf ~/.config/shell/profile ~/.zprofile
 config config --local status.showUntrackedFiles no
+EOF
 exit
