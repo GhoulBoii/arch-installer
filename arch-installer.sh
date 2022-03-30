@@ -69,20 +69,18 @@ sed -i '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
 # Part 3: Graphical Interface
 
 clear
-arch-chroot /mnt /bin/bash <<EOF
-su $username
-cd $HOME
-git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
-sudo make -C ~/.local/src/dwm install
-git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
-sudo make -C ~/.local/src/dmenu install
-git clone --depth=1 https://github.com/Jguer/yay ~/.local/src/yay
-cd ~/.local/src/yay
-makepkg -si
-rm -rf ~/.local/src/yay
-cd
-ln -sf ~/.config/shell/profile ~/.zprofile
-alias config='	config="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
-config config --local status.showUntrackedFiles no
-EOF
+arch-chroot /mnt su $username
+arch-chroot /mnt cd $HOME
+arch-chroot /mnt git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
+arch-chroot /mnt sudo make -C ~/.local/src/dwm install
+arch-chroot /mnt git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
+arch-chroot /mnt sudo make -C ~/.local/src/dmenu install
+arch-chroot /mnt git clone --depth=1 https://github.com/Jguer/yay ~/.local/src/yay
+arch-chroot /mnt cd ~/.local/src/yay
+arch-chroot /mnt makepkg -si
+arch-chroot /mnt rm -rf ~/.local/src/yay
+arch-chroot /mnt cd
+arch-chroot /mnt ln -sf ~/.config/shell/profile ~/.zprofile
+arch-chroot /mnt alias config="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
+arch-chroot /mnt config config --local status.showUntrackedFiles no
 exit
