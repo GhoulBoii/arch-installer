@@ -71,8 +71,8 @@ sed -i '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
 clear
 arch-chroot /mnt sudo -i -u ghoul bash <<EOF
 cd ~
-git clone --seperate-git-dir=~/.dotfiles https://github.com/ghoulboii/dotfiles.git tmpdotfiles
-rsync --recursive --verbose --exclude '.git' tmpdotfiles/ ~/
+git clone --separate-git-dir=~/.dotfiles https://github.com/ghoulboii/dotfiles.git tmpdotfiles
+rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
 rm -rf tmpdotfiles
 git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
 sudo make -C ~/.local/src/dwm install
