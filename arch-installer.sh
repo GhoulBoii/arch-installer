@@ -20,7 +20,7 @@ mount $linux /mnt
 case $swapcreation in
   /dev/*)
     mkswap $swapcreation
-    swapon $swap
+    swapon $swapcreation
     ;;
 esac
 case $bios in
@@ -50,7 +50,7 @@ echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
 echo "Enter your root password: "
 arch-chroot /mnt passwd
 arch-chroot /mnt pacman -Sy --noconfirm grub os-prober networkmanager reflector linux-headers xdg-user-dirs xdg-utils pipewire pipewire-pulse openssh tlp \
-  virt-manager qemu virt-viewer libvirt dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g tlp zsh git neovim rsync
+  virt-manager qemu virt-viewer libvirt dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g tlp zsh git neovim rsync xorg-server xorg-xinit
 case $bios in
      /dev/*)
         arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
@@ -71,7 +71,7 @@ sed -i '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
 clear
 arch-chroot /mnt sudo -i -u ghoul bash <<EOF
 cd ~
-git clone --seperate-git-dir=$HOME=.dotfiles https://github.com/ghoulboii/dotfiles.git tmpdotfiles
+git clone --seperate-git-dir=~/.dotfiles https://github.com/ghoulboii/dotfiles.git tmpdotfiles
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ ~/
 rm -rf tmpdotfiles
 git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
@@ -79,6 +79,7 @@ sudo make -C ~/.local/src/dwm install
 git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
 sudo make -C ~/.local/src/dmenu install
 git clone --depth=1 https://github.com/Jguer/yay ~/.local/src/yay
+# yay -S libxft-bgra-git
 cd ~/.local/src/yay
 makepkg --noconfirm -si
 cd ~
