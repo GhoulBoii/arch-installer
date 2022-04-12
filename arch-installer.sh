@@ -48,7 +48,6 @@ echo "127.0.0.1 localhost" >> /mnt/etc/hosts
 echo "::1       localhost" >> /mnt/etc/hosts
 echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
 echo "Enter your root password: "
-arch-chroot /mnt <<EOF
 passwd
 PKGS=(
   'alacritty'
@@ -99,9 +98,8 @@ PKGS=(
 )
 for PKG in "${PKGS[@]}"; do
     echo "INSTALLING: ${PKG}"
-    pacman -S "$PKG" --noconfirm --needed
+    arch-chroot /mnt pacman -S "$PKG" --noconfirm --needed
 done
-EOF
 case $bios in
      /dev/*)
         arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
@@ -120,7 +118,7 @@ sed -i '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
 # Part 3: Graphical Interface
 
 clear
-arch-chroot /mnt sudo -i -u ghoul bash <<EOF
+arch-chroot /mnt sudo -i -u $username bash <<EOF
 cd ~
 git clone --separate-git-dir=~/.dotfiles https://github.com/ghoulboii/dotfiles.git tmpdotfiles
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
