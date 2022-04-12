@@ -51,51 +51,51 @@ echo "Enter your root password: "
 arch-chroot /mnt <<EOF
 passwd
 PKGS=(
-  alacritty
-  bridge-utils
-  dnsmasq
-  flatpak
-  git
-  grub
-  libvirt
-  linux-headers
-  lutris
-  man-db
-  mesa
-  mesa-utils
-  ncdu
-  neofetch
-  neovim
-  networkmanager
-  ntfs-3g
-  openbsd-netcat
-  openssh
-  os-prober
-  pipewire
-  pipewire-pulse
-  playerctl
-  python-pywal
-  qemu
-  reflector
-  rofi
-  rsync
-  tlp
-  tmux
-  vde2
-  virt-manager
-  virt-viewer
-  wireplumber
-  xbindkeys
-  xclip
-  xcompmgr
-  xdg-user-dirs
-  xdg-utils
-  xorg-server
-  xorg-xinit
-  xorg-xinput
-  yt-dlp
-  zsh
-  zsh-autosuggestions
+  'alacritty'
+  'bridge-utils'
+  'dnsmasq'
+  'flatpak'
+  'git'
+  'grub'
+  'libvirt'
+  'linux-headers'
+  'lutris'
+  'man-db'
+  'mesa'
+  'mesa-utils'
+  'ncdu'
+  'neofetch'
+  'neovim'
+  'networkmanager'
+  'ntfs-3g'
+  'openbsd-netcat'
+  'openssh'
+  'os-prober'
+  'pipewire'
+  'pipewire-pulse'
+  'playerctl'
+  'python-pywal'
+  'qemu'
+  'reflector'
+  'rofi'
+  'rsync'
+  'tlp'
+  'tmux'
+  'vde2'
+  'virt-manager'
+  'virt-viewer'
+  'wireplumber'
+  'xbindkeys'
+  'xclip'
+  'xcompmgr'
+  'xdg-user-dirs'
+  'xdg-utils'
+  'xorg-server'
+  'xorg-xinit'
+  'xorg-xinput'
+  'yt-dlp'
+  'zsh'
+  'zsh-autosuggestions'
 )
 for PKG in "${PKGS[@]}"; do
     echo "INSTALLING: ${PKG}"
@@ -135,12 +135,12 @@ makepkg --noconfirm -si
 cd ~
 rm -rf ~/.local/src/yay
 AURPKGS=(
-  jdk-temurin
-  jdk8-adoptopenjdk
-  libxft-bgra-git
-  nerd-fonts-hack
-  ttf-ms-fonts
-  zsh-fast-syntax-highlighting
+  'jdk-temurin'
+  'jdk8-adoptopenjdk'
+  'libxft-bgra-git'
+  'nerd-fonts-hack'
+  'ttf-ms-fonts'
+  'zsh-fast-syntax-highlighting'
   )
 for AURPKG in "${AURPKGS[@]}"; do
     echo "INSTALLING: ${AURPKG}"
