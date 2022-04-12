@@ -48,9 +48,60 @@ echo "127.0.0.1 localhost" >> /mnt/etc/hosts
 echo "::1       localhost" >> /mnt/etc/hosts
 echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
 echo "Enter your root password: "
-arch-chroot /mnt passwd
-arch-chroot /mnt pacman -Sy --noconfirm grub os-prober networkmanager reflector linux-headers xdg-user-dirs xdg-utils pipewire pipewire-pulse openssh tlp \
-  virt-manager qemu virt-viewer libvirt dnsmasq vde2 bridge-utils openbsd-netcat flatpak ntfs-3g tlp zsh git neovim rsync xorg-server xorg-xinit
+arch-chroot /mnt <<EOF
+passwd
+PKGS=(
+  alacritty
+  bridge-utils
+  dnsmasq
+  flatpak
+  git
+  grub
+  libvirt
+  linux-headers
+  lutris
+  man-db
+  mesa
+  mesa-utils
+  ncdu
+  neofetch
+  neovim
+  networkmanager
+  ntfs-3g
+  openbsd-netcat
+  openssh
+  os-prober
+  pipewire
+  pipewire-pulse
+  playerctl
+  python-pywal
+  qemu
+  reflector
+  rofi
+  rsync
+  tlp
+  tmux
+  vde2
+  virt-manager
+  virt-viewer
+  wireplumber
+  xbindkeys
+  xclip
+  xcompmgr
+  xdg-user-dirs
+  xdg-utils
+  xorg-server
+  xorg-xinit
+  xorg-xinput
+  yt-dlp
+  zsh
+  zsh-autosuggestions
+)
+for PKG in "${PKGS[@]}"; do
+    echo "INSTALLING: ${PKG}"
+    pacman -S "$PKG" --noconfirm --needed
+done
+EOF
 case $bios in
      /dev/*)
         arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
@@ -78,14 +129,25 @@ git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
 sudo make -C ~/.local/src/dwm install
 git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
 sudo make -C ~/.local/src/dmenu install
-git clone --depth=1 https://github.com/Jguer/yay ~/.local/src/yay
-# yay -S libxft-bgra-git
+git clone --depth=1 https://aur.archlinux.org/yay-bin.git ~/.local/src/yay
 cd ~/.local/src/yay
 makepkg --noconfirm -si
 cd ~
 rm -rf ~/.local/src/yay
+AURPKGS=(
+  jdk-temurin
+  jdk8-adoptopenjdk
+  libxft-bgra-git
+  nerd-fonts-hack
+  ttf-ms-fonts
+  zsh-fast-syntax-highlighting
+  )
+for AURPKG in "${AURPKGS[@]}"; do
+    echo "INSTALLING: ${AURPKG}"
+    yay -S "$AURPKG" --noconfirm --needed
+do
 ln -sf ~/.config/shell/profile ~/.zprofile
-alias config="/usr/bin/git --git-dir=~/.dotfiles/ --work-tree=~"
+alias config="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 config config --local status.showUntrackedFiles no
 EOF
 exit
