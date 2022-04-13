@@ -118,7 +118,7 @@ sed -i '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
 # Part 3: Graphical Interface
 
 clear
-arch-chroot /mnt sudo -i -u $username zsh <<EOF
+arch-chroot /mnt sudo -i -u $username bash <<EOF
 cd
 git clone --depth=1 --separate-git-dir=.dotfiles https://github.com/ghoulboii/dotfiles.git tmpdotfiles
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
@@ -133,8 +133,7 @@ makepkg --noconfirm -si
 cd
 rm -rf ~/.local/src/yay
 ln -sf ~/.config/shell/profile ~/.zprofile
-alias config="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
-config config --local status.showUntrackedFiles no
+/usr/bin/git --git-dir=~/.dotfiles/ --work-tree=~ config --local status.showUntrackedFiles no
 EOF
 AURPKGS=(
   'jdk-temurin'
@@ -146,6 +145,6 @@ AURPKGS=(
   )
 for AURPKG in "${AURPKGS[@]}"; do
     echo "INSTALLING: ${AURPKG}"
-    arch-chroot /mnt sudo -i -u $username bash yay -S "$AURPKG" --noconfirm --needed
+    arch-chroot /mnt sudo -i -u $username yay -S "$AURPKG" --noconfirm --needed
 done
 exit
