@@ -118,9 +118,9 @@ sed -i '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
 # Part 3: Graphical Interface
 
 clear
-arch-chroot /mnt sudo -i -u $username bash <<EOF
-cd ~
-git clone --separate-git-dir=~/.dotfiles https://github.com/ghoulboii/dotfiles.git tmpdotfiles
+arch-chroot /mnt sudo -i -u $username zsh <<EOF
+cd
+git clone --depth=1 --separate-git-dir=.dotfiles https://github.com/ghoulboii/dotfiles.git tmpdotfiles
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
 rm -rf tmpdotfiles
 git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
@@ -130,8 +130,12 @@ sudo make -C ~/.local/src/dmenu install
 git clone --depth=1 https://aur.archlinux.org/yay-bin.git ~/.local/src/yay
 cd ~/.local/src/yay
 makepkg --noconfirm -si
-cd ~
+cd
 rm -rf ~/.local/src/yay
+ln -sf ~/.config/shell/profile ~/.zprofile
+alias config="/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
+config config --local status.showUntrackedFiles no
+EOF
 AURPKGS=(
   'jdk-temurin'
   'jdk8-adoptopenjdk'
@@ -142,9 +146,6 @@ AURPKGS=(
   )
 for AURPKG in "${AURPKGS[@]}"; do
     echo "INSTALLING: ${AURPKG}"
-    yay -S "$AURPKG" --noconfirm --needed
-do
-ln -sf ~/.config/shell/profile ~/.zprofile
-$(/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME") config --local status.showUntrackedFiles no
-EOF
+    arch-chroot /mnt sudo -i -u $username bash yay -S "$AURPKG" --noconfirm --needed
+done
 exit
