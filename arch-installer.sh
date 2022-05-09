@@ -125,8 +125,6 @@ rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
 rm -rf tmpdotfiles
 git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
 sudo make -C ~/.local/src/dwm install
-git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
-sudo make -C ~/.local/src/dmenu install
 git clone --depth=1 https://aur.archlinux.org/yay-bin.git ~/.local/src/yay
 cd ~/.local/src/yay
 makepkg --noconfirm -si
