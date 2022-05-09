@@ -1,6 +1,6 @@
 #!/usr/bin/env bash 
 # Part 1: Partition Setup
-
+# TODO: Graphics Card Driver Installer
 clear
 echo "GhoulBoi's Arch Installer"
 echo "Part 1: Partition Setup"
@@ -50,45 +50,62 @@ echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
 echo "Enter your root password: "
 passwd
 PKGS=(
-  'alacritty'
   'bridge-utils'
+  'btop'
+  'btrfs-progs'
+  'dash'
   'dnsmasq'
+  'dunst'
+  'emacs'
+  'feh'
   'flatpak'
+  'gamemode'
   'git'
   'grub'
+  'intel-ucode'
+  'lib32-pipewire'
   'libvirt'
-  'linux-headers'
+  'linux-zen-headers'
   'lutris'
   'man-db'
   'mesa'
   'mesa-utils'
+  'mpv'
   'ncdu'
   'neofetch'
   'neovim'
-  'networkmanager'
+  'iwd'
   'ntfs-3g'
   'openbsd-netcat'
   'openssh'
   'os-prober'
+  'pcmanfm'
   'pipewire'
   'pipewire-pulse'
   'playerctl'
   'python-pywal'
-  'qemu'
+  'qemu-desktop'
   'reflector'
   'rofi'
   'rsync'
   'tlp'
-  'tmux'
   'vde2'
   'virt-manager'
   'virt-viewer'
+  'wezterm'
+  'wine-nine'
+  'wine-staging'
+  'winetricks'
   'wireplumber'
   'xbindkeys'
   'xclip'
   'xcompmgr'
+  # TEST XDG DESKTOP PORTAL PACKAGES
+  'xdg-desktop-portal-gtk'
   'xdg-user-dirs'
   'xdg-utils'
+  'xdotool'
+  # 'xf86-video-intel'
   'xorg-server'
   'xorg-xinit'
   'xorg-xinput'
@@ -134,10 +151,16 @@ ln -sf ~/.config/shell/profile ~/.zprofile
 /usr/bin/git --git-dir=~/.dotfiles/ --work-tree=~ config --local status.showUntrackedFiles no
 EOF
 AURPKGS=(
+  'autojump-rs'
+  'devour'
   'jdk-temurin'
   'jdk8-adoptopenjdk'
+  'lf-bin'
   'libxft-bgra-git'
   'nerd-fonts-hack'
+  # 'nvidia-390xx-dkms'
+  # 'optimus-manager'
+  'pywal-git'
   'ttf-ms-fonts'
   'zsh-fast-syntax-highlighting'
   )
