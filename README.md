@@ -1,6 +1,10 @@
 # Arch Installer 
 Automated Arch Linux Installer for Different Scenarios and Scemes.
 
+## TODO
+
+- [] Doom Emacs Install
+
 ## License 
 
 This project is licensed under the GPL-3.0 License - see the [License](LICENSE.md) file for details.
