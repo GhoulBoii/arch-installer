@@ -1,6 +1,7 @@
 #!/usr/bin/env bash 
 # Part 1: Partition Setup
 # TODO: Graphics Card Driver Installer
+# TODO: Flatpak apps, doom emacs
 clear
 echo "GhoulBoi's Arch Installer"
 echo "Part 1: Partition Setup"
@@ -11,10 +12,12 @@ lsblk
 read -p "Enter drive (Ex. - /dev/sda): " drive
 cfdisk $drive
 read -p "Enter the Linux Partition (Ex. - /dev/sda2): " linux
-read -p "Enter SWAP partition (Enter \"n\" if no SWAP): " swapcreation
-read -p "Enter EFI partition (Enter \"n\" if using BIOS): " bios
+read -p "Enter SWAP partition (Skip if no SWAP): " swapcreation
+read -p "Enter EFI partition (Skip if using BIOS): " bios
 read -p "Enter the hostname: " hostname
 read -p "Enter username: " username
+echo "Amd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users."
+read -p "Enter which graphics driver you use (Enter \"N\" for Nvidia or \"n\" for Legacy Nvidia Drivers (Driver 390))" nvidia
 mkfs.btrfs -fL Linux $linux
 mount $linux /mnt
 case $swapcreation in
@@ -52,7 +55,6 @@ passwd
 PKGS=(
   'bridge-utils'
   'btop'
-  'btrfs-progs'
   'dash'
   'dnsmasq'
   'dunst'
@@ -62,10 +64,8 @@ PKGS=(
   'gamemode'
   'git'
   'grub'
-  'intel-ucode'
   'lib32-pipewire'
   'libvirt'
-  'linux-firmware'
   'linux-zen-headers'
   'lutris'
   'man-db'
@@ -79,6 +79,7 @@ PKGS=(
   'ntfs-3g'
   'openbsd-netcat'
   'openssh'
+  'optimus-manager'
   'os-prober'
   'pcmanfm'
   'pipewire'
@@ -106,7 +107,6 @@ PKGS=(
   'xdg-user-dirs'
   'xdg-utils'
   'xdotool'
-  # 'xf86-video-intel'
   'xf86-input-libinput'
   'xorg-server'
   'xorg-xinit'
@@ -162,8 +162,6 @@ AURPKGS=(
   'lf-bin'
   'libxft-bgra-git'
   'nerd-fonts-hack'
-  # 'nvidia-390xx-dkms'
-  # 'optimus-manager'
   'pywal-git'
   'ttf-ms-fonts'
   'zsh-fast-syntax-highlighting'
@@ -171,5 +169,30 @@ AURPKGS=(
 for AURPKG in "${AURPKGS[@]}"; do
     echo "INSTALLING: ${AURPKG}"
     arch-chroot /mnt sudo -i -u $username yay -S "$AURPKG" --noconfirm --needed
+done
+
+case $nvidia in
+  N)
+    arch-chroot /mnt sudo -i -u $username yay -S nvidia-dkms nvidia-utils lib32-nvidia-utils
+    ;;
+  n)
+    arch-chroot /mnt sudo -i -u $username yay -S nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
+    ;;
+esac
+FLATPAKPKGS=(
+  'com.brave.Browser'
+  'com.github.tchx84.Flatseal'
+  'com.github.wwmm.easyeffects'
+  'com.valvesoftware.Steam'
+  'org.flameshot.Flameshot'
+  'org.gimp.Gimp'
+  'org.libreoffice.LibreOffice'
+  'org.polymc.PolyMC'
+  'org.qbittorrent.qBittorrent'
+  'sh.ppy.osu'
+)
+for FLATPAKPKG in "${FLATPAKPKGS[@]}"; do
+    echo "INSTALLING: ${FLATPAKPKG}"
+    arch-chroot /mnt sudo -i -u $username flatpak install --noninteractive "$FLATPAKPKG"
 done
 exit
