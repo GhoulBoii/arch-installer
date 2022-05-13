@@ -1,7 +1,6 @@
 #!/usr/bin/env bash 
 # Part 1: Partition Setup
-# TODO: Graphics Card Driver Installer
-# TODO: Flatpak apps, doom emacs
+
 clear
 echo "GhoulBoi's Arch Installer"
 echo "Part 1: Partition Setup"
@@ -11,11 +10,13 @@ timedatectl set-ntp true
 lsblk
 read -p "Enter drive (Ex. - /dev/sda): " drive
 cfdisk $drive
+lsblk
 read -p "Enter the Linux Partition (Ex. - /dev/sda2): " linux
 read -p "Enter SWAP partition (Skip if no SWAP): " swapcreation
 read -p "Enter EFI partition (Skip if using BIOS): " bios
 read -p "Enter the hostname: " hostname
 read -p "Enter username: " username
+read -p "Enter password: " password
 echo "Amd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users."
 read -p "Enter which graphics driver you use (Enter \"N\" for Nvidia or \"n\" for Legacy Nvidia Drivers (Driver 390))" nvidia
 mkfs.btrfs -fL Linux $linux
@@ -40,7 +41,12 @@ genfstab -U /mnt >> /mnt/etc/fstab
 
 clear
 echo "Part 2: Base System"
+
+# Pacman Config
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /mnt/etc/pacman.conf
+echo "ILoveCandy" >> /mnt/etc/pacman.conf
+
+# Locale and Hosts
 ln -sf /mnt/usr/share/zoneinfo/Asia/Kolkata /mnt/etc/localtime
 arch-chroot /mnt hwclock --systohc
 echo "en_US.UTF-8 UTF-8" >> /mnt/etc/locale.gen
@@ -50,8 +56,8 @@ echo $hostname > /mnt/etc/hostname
 echo "127.0.0.1 localhost" >> /mnt/etc/hosts
 echo "::1       localhost" >> /mnt/etc/hosts
 echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
-echo "Enter your root password: "
-passwd
+
+arch-chroot /mnt echo root:"$username" | chpasswd
 PKGS=(
   'bridge-utils'
   'btop'
@@ -75,7 +81,8 @@ PKGS=(
   'ncdu'
   'neofetch'
   'neovim'
-  'iwd'
+  'networkmanager'
+  # 'iwd'
   'ntfs-3g'
   'openbsd-netcat'
   'openssh'
@@ -88,6 +95,7 @@ PKGS=(
   'python-pywal'
   'qemu-desktop'
   'reflector'
+  'ripgrep'
   'rofi'
   'rsync'
   'tlp'
@@ -133,7 +141,7 @@ esac
 arch-chroot /mnt systemctl enable NetworkManager tlp reflector.timer
 arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
 arch-chroot /mnt usermod -aG libvirt $username
-arch-chroot /mnt passwd $username
+arch-chroot /mnt echo "$username:$password" | chpasswd
 sed -i '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
 
 # Part 3: Graphical Interface
@@ -141,19 +149,25 @@ sed -i '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
 clear
 arch-chroot /mnt sudo -i -u $username bash <<EOF
 cd
+
+# DOTFILES
 git clone --depth=1 --separate-git-dir=.dotfiles https://github.com/ghoulboii/dotfiles.git tmpdotfiles
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
 rm -rf tmpdotfiles
+/usr/bin/git --git-dir=~/.dotfiles/ --work-tree=~ config --local status.showUntrackedFiles no
+
+# DWM (Window manager)
 git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
 sudo make -C ~/.local/src/dwm install
+
+# YAY (AUR helper)
 git clone --depth=1 https://aur.archlinux.org/yay-bin.git ~/.local/src/yay
 cd ~/.local/src/yay
-makepkg --noconfirm -si
+makepkg --noconfirm -rsi
 cd
 rm -rf ~/.local/src/yay
-ln -sf ~/.config/shell/profile ~/.zprofile
-/usr/bin/git --git-dir=~/.dotfiles/ --work-tree=~ config --local status.showUntrackedFiles no
 EOF
+
 AURPKGS=(
   'autojump-rs'
   'devour'
@@ -179,6 +193,7 @@ case $nvidia in
     arch-chroot /mnt sudo -i -u $username yay -S nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
     ;;
 esac
+
 FLATPAKPKGS=(
   'com.brave.Browser'
   'com.github.tchx84.Flatseal'
@@ -195,4 +210,7 @@ for FLATPAKPKG in "${FLATPAKPKGS[@]}"; do
     echo "INSTALLING: ${FLATPAKPKG}"
     arch-chroot /mnt sudo -i -u $username flatpak install --noninteractive "$FLATPAKPKG"
 done
+
+git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs/
+~/.config/emacs/bin/doom -y install
 exit
