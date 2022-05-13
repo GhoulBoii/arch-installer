@@ -18,7 +18,7 @@ read -p "Enter the hostname: " hostname
 read -p "Enter username: " username
 read -p "Enter password: " password
 echo "Amd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users."
-read -p "Enter which graphics driver you use (Enter \"N\" for Nvidia or \"n\" for Legacy Nvidia Drivers (Driver 390))" nvidia
+read -p "Enter which graphics driver you use (Enter \"N\" for Nvidia or \"n\" for Legacy Nvidia Drivers (Driver 390): " nvidia
 mkfs.btrfs -fL Linux $linux
 mount $linux /mnt
 case $swapcreation in
@@ -44,7 +44,8 @@ echo "Part 2: Base System"
 
 # Pacman Config
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /mnt/etc/pacman.conf
-echo "ILoveCandy" >> /mnt/etc/pacman.conf
+grep -q "ILoveCandy" /mnt/etc/pacman.conf || sed -i "/#VerbosePkgLists/a ILoveCandy" /mnt/etc/pacman.conf
+sed -i "/^#ParallelDownloads/s/=.*/= 5/;s/^#Color$/Color/" /mnt/etc/pacman.conf
 
 # Locale and Hosts
 ln -sf /mnt/usr/share/zoneinfo/Asia/Kolkata /mnt/etc/localtime
@@ -57,7 +58,9 @@ echo "127.0.0.1 localhost" >> /mnt/etc/hosts
 echo "::1       localhost" >> /mnt/etc/hosts
 echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
 
-arch-chroot /mnt echo root:"$username" | chpasswd
+arch-chroot /mnt <<EOF
+echo "root:$password" | chpasswd
+EOF
 PKGS=(
   'bridge-utils'
   'btop'
@@ -141,7 +144,9 @@ esac
 arch-chroot /mnt systemctl enable NetworkManager tlp reflector.timer
 arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
 arch-chroot /mnt usermod -aG libvirt $username
-arch-chroot /mnt echo "$username:$password" | chpasswd
+arch-chroot /mnt bash <<EOF
+echo "$username:$password" | chpasswd
+EOF
 sed -i '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
 
 # Part 3: Graphical Interface
