@@ -61,77 +61,17 @@ echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
 arch-chroot /mnt <<EOF
 echo "root:$password" | chpasswd
 EOF
-PKGS=(
-  'bridge-utils'
-  'btop'
-  'dash'
-  'dnsmasq'
-  'dunst'
-  'emacs'
-  'feh'
-  'flatpak'
-  'gamemode'
-  'git'
-  'grub'
-  'lib32-pipewire'
-  'libvirt'
-  'linux-zen-headers'
-  'lutris'
-  'man-db'
-  'mesa'
-  'mesa-utils'
-  'mpv'
-  'ncdu'
-  'neofetch'
-  'neovim'
-  'networkmanager'
-  # 'iwd'
-  'ntfs-3g'
-  'openbsd-netcat'
-  'openssh'
-  'optimus-manager'
-  'os-prober'
-  'pcmanfm'
-  'pipewire'
-  'pipewire-pulse'
-  'playerctl'
-  'python-pywal'
-  'qemu-desktop'
-  'reflector'
-  'ripgrep'
-  'rofi'
-  'rsync'
-  'tlp'
-  'vde2'
-  'virt-manager'
-  'virt-viewer'
-  'wezterm'
-  'wine-nine'
-  'wine-staging'
-  'winetricks'
-  'wireplumber'
-  'xbindkeys'
-  'xclip'
-  'xcompmgr'
-  # TEST XDG DESKTOP PORTAL PACKAGES
-  'xdg-desktop-portal-gtk'
-  'xdg-user-dirs'
-  'xdg-utils'
-  'xdotool'
-  'xf86-input-libinput'
-  'xorg-server'
-  'xorg-xinit'
-  'xorg-xinput'
-  'xorg-xrandr'
-  'xorg-xset'
-  'yt-dlp'
-  'zsh'
-  'zsh-autosuggestions'
-)
-for PKG in "${PKGS[@]}"; do
-    echo "INSTALLING: ${PKG}"
-    arch-chroot /mnt pacman -S "$PKG" --noconfirm --needed
-done
+arch-chroot /mnt pacman -Sy bridge-utils btop dash dnsmasq dunst emacs feh flatpak \
+                            gamemode git grub lib32-pipewire libvirt linux-zen-headers lutris man-db \
+                            mesa mesa-utils mpv ncdu neofetch neovim networkmanager ntfs-3g \
+                            openbsd-netcat openssh optimus-manager os-prober pcmanfm pipewire pipewire-pulse playerctl \
+                            python-pywal qemu-desktop reflector ripgrep rofi rsync tlp vde2 \
+                            virt-manager virt-viewer wezterm wine-nine wine-staging \
+                            winetricks wireplumber xbindkeys xclip \
+                            xcompmgr xdg-desktop-portal-gtk xdg-user-dirs xdg-utils \
+                            xdotool xf86-input-libinput xorg-server xorg-xinit \
+                            xorg-xinput xorg-xrandr xorg-xset yt-dlp \
+                            zsh zsh-autosuggestions
 case $bios in
      /dev/*)
         arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
@@ -144,7 +84,7 @@ esac
 arch-chroot /mnt systemctl enable NetworkManager tlp reflector.timer
 arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
 arch-chroot /mnt usermod -aG libvirt $username
-arch-chroot /mnt bash <<EOF
+arch-chroot /mnt <<EOF
 echo "$username:$password" | chpasswd
 EOF
 sed -i '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
@@ -171,25 +111,15 @@ cd ~/.local/src/yay
 makepkg --noconfirm -rsi
 cd
 rm -rf ~/.local/src/yay
+
+# DOOM EMACS (CODE EDITOR)
+git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs/
+~/.config/emacs/bin/doom -y install
 EOF
 
-AURPKGS=(
-  'autojump-rs'
-  'devour'
-  'jdk-temurin'
-  'jdk8-adoptopenjdk'
-  'lf-bin'
-  'libxft-bgra-git'
-  'nerd-fonts-hack'
-  'pywal-git'
-  'ttf-ms-fonts'
-  'zsh-fast-syntax-highlighting'
-  )
-for AURPKG in "${AURPKGS[@]}"; do
-    echo "INSTALLING: ${AURPKG}"
-    arch-chroot /mnt sudo -i -u $username yay -S "$AURPKG" --noconfirm --needed
-done
-
+arch-chroot /mnt sudo -i -u $username yay -S autojump-rs devour jdk-temurin jdk8-adoptopenjdk \
+                                             lf-bin libxft-bgra-git nerd-fonts-hack pywal-git \
+                                             ttf-ms-fonts zsh-fast-syntax-highlighting
 case $nvidia in
   N)
     arch-chroot /mnt sudo -i -u $username yay -S nvidia-dkms nvidia-utils lib32-nvidia-utils
@@ -199,23 +129,8 @@ case $nvidia in
     ;;
 esac
 
-FLATPAKPKGS=(
-  'com.brave.Browser'
-  'com.github.tchx84.Flatseal'
-  'com.github.wwmm.easyeffects'
-  'com.valvesoftware.Steam'
-  'org.flameshot.Flameshot'
-  'org.gimp.Gimp'
-  'org.libreoffice.LibreOffice'
-  'org.polymc.PolyMC'
-  'org.qbittorrent.qBittorrent'
-  'sh.ppy.osu'
-)
-for FLATPAKPKG in "${FLATPAKPKGS[@]}"; do
-    echo "INSTALLING: ${FLATPAKPKG}"
-    arch-chroot /mnt sudo -i -u $username flatpak install --noninteractive "$FLATPAKPKG"
-done
-
-git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs/
-~/.config/emacs/bin/doom -y install
+arch-chroot /mnt sudo -i -u $username flatpak install -y com.brave.Browser com.github.tchx84.Flatseal \
+                                                         com.github.wwmm.easyeffects com.valvesoftware.Steam \
+                                                         org.flameshot.Flameshot org.gimp.Gimp org.libreoffice.LibreOffice \
+                                                         org.polymc.PolyMC org.qbittorrent.qBittorrent sh.ppy.osu
 exit
