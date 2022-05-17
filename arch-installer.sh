@@ -46,7 +46,7 @@ echo "Part 2: Base System"
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /mnt/etc/pacman.conf
 grep -q "ILoveCandy" /mnt/etc/pacman.conf || sed -i "/#VerbosePkgLists/a ILoveCandy" /mnt/etc/pacman.conf
 sed -i "/^#ParallelDownloads/s/=.*/= 5/;s/^#Color$/Color/" /mnt/etc/pacman.conf
-echo "\n[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /mnt/etc/pacman.conf
+echo -e "\n[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /mnt/etc/pacman.conf
 
 # Locale and Hosts
 ln -sf /mnt/usr/share/zoneinfo/Asia/Kolkata /mnt/etc/localtime
@@ -66,7 +66,7 @@ arch-chroot /mnt <<EOF
 pacman -Sy --noconfirm bridge-utils btop dash dnsmasq dunst emacs feh flatpak \
                        gamemode git grub lib32-pipewire libvirt linux-zen-headers lutris man-db \
                        mesa mesa-utils mpv ncdu neofetch neovim networkmanager ntfs-3g \
-                       openbsd-netcat openssh optimus-manager os-prober pcmanfm pipewire pipewire-pulse playerctl \
+                       openbsd-netcat openssh os-prober pcmanfm pipewire pipewire-pulse playerctl \
                        python-pywal qemu-desktop reflector ripgrep rofi rsync tlp vde2 \
                        virt-manager virt-viewer wezterm wine-nine wine-staging \
                        winetricks wireplumber xbindkeys xclip \
@@ -122,7 +122,7 @@ EOF
 
 arch-chroot /mnt <<EOF
 sudo -i -u $username yay -S --noconfirm autojump-rs devour jdk-temurin jdk8-adoptopenjdk \
-                                        lf-bin libxft-bgra-git nerd-fonts-hack pywal-git \
+                                        lf-bin libxft-bgra-git nerd-fonts-hack optimus-manager pywal-git \
                                         ttf-ms-fonts zsh-fast-syntax-highlighting
 EOF
 case $nvidia in
