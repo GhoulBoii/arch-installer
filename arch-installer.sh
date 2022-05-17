@@ -61,17 +61,19 @@ echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
 arch-chroot /mnt <<EOF
 echo "root:$password" | chpasswd
 EOF
-arch-chroot /mnt pacman -Sy bridge-utils btop dash dnsmasq dunst emacs feh flatpak \
-                            gamemode git grub lib32-pipewire libvirt linux-zen-headers lutris man-db \
-                            mesa mesa-utils mpv ncdu neofetch neovim networkmanager ntfs-3g \
-                            openbsd-netcat openssh optimus-manager os-prober pcmanfm pipewire pipewire-pulse playerctl \
-                            python-pywal qemu-desktop reflector ripgrep rofi rsync tlp vde2 \
-                            virt-manager virt-viewer wezterm wine-nine wine-staging \
-                            winetricks wireplumber xbindkeys xclip \
-                            xcompmgr xdg-desktop-portal-gtk xdg-user-dirs xdg-utils \
-                            xdotool xf86-input-libinput xorg-server xorg-xinit \
-                            xorg-xinput xorg-xrandr xorg-xset yt-dlp \
-                            zsh zsh-autosuggestions
+arch-chroot /mnt <<EOF
+pacman -Sy --noconfirm bridge-utils btop dash dnsmasq dunst emacs feh flatpak \
+                       gamemode git grub lib32-pipewire libvirt linux-zen-headers lutris man-db \
+                       mesa mesa-utils mpv ncdu neofetch neovim networkmanager ntfs-3g \
+                       openbsd-netcat openssh optimus-manager os-prober pcmanfm pipewire pipewire-pulse playerctl \
+                       python-pywal qemu-desktop reflector ripgrep rofi rsync tlp vde2 \
+                       virt-manager virt-viewer wezterm wine-nine wine-staging \
+                       winetricks wireplumber xbindkeys xclip \
+                       xcompmgr xdg-desktop-portal-gtk xdg-user-dirs xdg-utils \
+                       xdotool xf86-input-libinput xorg-server xorg-xinit \
+                       xorg-xinput xorg-xrandr xorg-xset yt-dlp \
+                       zsh zsh-autosuggestions
+EOF
 case $bios in
      /dev/*)
         arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
@@ -117,9 +119,11 @@ git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs/
 ~/.config/emacs/bin/doom -y install
 EOF
 
-arch-chroot /mnt sudo -i -u $username yay -S autojump-rs devour jdk-temurin jdk8-adoptopenjdk \
-                                             lf-bin libxft-bgra-git nerd-fonts-hack pywal-git \
-                                             ttf-ms-fonts zsh-fast-syntax-highlighting
+arch-chroot /mnt <<EOF
+sudo -i -u $username yay -S --noconfirm autojump-rs devour jdk-temurin jdk8-adoptopenjdk \
+                                        lf-bin libxft-bgra-git nerd-fonts-hack pywal-git \
+                                        ttf-ms-fonts zsh-fast-syntax-highlighting
+EOF
 case $nvidia in
   N)
     arch-chroot /mnt sudo -i -u $username yay -S nvidia-dkms nvidia-utils lib32-nvidia-utils
@@ -129,8 +133,10 @@ case $nvidia in
     ;;
 esac
 
-arch-chroot /mnt sudo -i -u $username flatpak install -y com.brave.Browser com.github.tchx84.Flatseal \
-                                                         com.github.wwmm.easyeffects com.valvesoftware.Steam \
-                                                         org.flameshot.Flameshot org.gimp.Gimp org.libreoffice.LibreOffice \
-                                                         org.polymc.PolyMC org.qbittorrent.qBittorrent sh.ppy.osu
+arch-chroot /mnt <<EOF
+sudo -i -u $username flatpak install -y com.brave.Browser com.github.tchx84.Flatseal \
+                                        com.github.wwmm.easyeffects com.valvesoftware.Steam \
+                                        org.flameshot.Flameshot org.gimp.Gimp org.libreoffice.LibreOffice \
+                                        org.polymc.PolyMC org.qbittorrent.qBittorrent sh.ppy.osu
+EOF
 exit
