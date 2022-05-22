@@ -90,7 +90,7 @@ arch-chroot /mnt usermod -aG libvirt $username
 arch-chroot /mnt <<EOF
 echo "$username:$password" | chpasswd
 EOF
-sed -i '/# %wheel ALL=(ALL:ALL) ALL/s/^#//' /mnt/etc/sudoers
+echo -e "root ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" > /etc/sudoers.d/00_nopasswd
 
 # Part 3: Graphical Interface
 
@@ -106,7 +106,7 @@ rm -rf tmpdotfiles
 
 # DWM (Window manager)
 git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
-sudo make -C ~/.local/src/dwm install
+sudo make -sC ~/.local/src/dwm install
 
 # YAY (AUR helper)
 git clone --depth=1 https://aur.archlinux.org/yay-bin.git ~/.local/src/yay
