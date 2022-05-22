@@ -79,7 +79,7 @@ case $bios in
      /dev/*)
         arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
     ;;
-      n)
+     *)
         arch-chroot /mnt grub-install --target=i386-pc $drive
         arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
     ;;
@@ -122,7 +122,7 @@ EOF
 
 arch-chroot /mnt <<EOF
 sudo -i -u $username yay -S --noconfirm autojump-rs devour jdk-temurin jdk8-adoptopenjdk \
-                                        lf-bin libxft-bgra-git nerd-fonts-hack optimus-manager pywal-git \
+                                        lf-bin nerd-fonts-hack optimus-manager  \
                                         ttf-ms-fonts zsh-fast-syntax-highlighting
 EOF
 case $nvidia in
@@ -134,10 +134,10 @@ case $nvidia in
     ;;
 esac
 
-arch-chroot /mnt <<EOF
-sudo -i -u $username flatpak install -y com.brave.Browser com.github.tchx84.Flatseal \
-                                        com.github.wwmm.easyeffects com.valvesoftware.Steam \
-                                        org.flameshot.Flameshot org.gimp.Gimp org.libreoffice.LibreOffice \
-                                        org.polymc.PolyMC org.qbittorrent.qBittorrent sh.ppy.osu
-EOF
+# arch-chroot /mnt <<EOF
+# sudo -i -u $username flatpak install -y com.brave.Browser com.github.tchx84.Flatseal \
+#                                         com.github.wwmm.easyeffects com.valvesoftware.Steam \
+#                                         org.flameshot.Flameshot org.gimp.Gimp org.libreoffice.LibreOffice \
+#                                         org.polymc.PolyMC org.qbittorrent.qBittorrent sh.ppy.osu
+# EOF
 exit

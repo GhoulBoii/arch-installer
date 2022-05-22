@@ -4,9 +4,10 @@ Automated Arch Linux Installer for Different Scenarios and Scemes.
 
 ## TODO
 
-- [ ] Adding all user input to the start
+- [x] Adding all user input to the start
 - [ ] Adding .local and other directories
 - [x] Doom Emacs Install
+- [ ] Flatpak packages
 
 ## License 
 
