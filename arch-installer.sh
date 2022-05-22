@@ -90,7 +90,7 @@ arch-chroot /mnt usermod -aG libvirt $username
 arch-chroot /mnt <<EOF
 echo "$username:$password" | chpasswd
 EOF
-echo -e "root ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" > /etc/sudoers.d/00_nopasswd
+echo -e "$username ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" >> /mnt/etc/sudoers
 
 # Part 3: Graphical Interface
 
