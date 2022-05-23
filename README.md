@@ -6,6 +6,7 @@ Automated Arch Linux Installer for Different Scenarios and Scemes.
 
 - [x] Adding all user input to the start
 - [ ] Adding .local and other directories
+- [ ] Btrfs Subvolumes
 - [x] Doom Emacs Install
 - [ ] Flatpak packages
 

@@ -4,9 +4,6 @@
 clear
 echo "GhoulBoi's Arch Installer"
 echo "Part 1: Partition Setup"
-sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
-pacman --noconfirm -Sy archlinux-keyring 
-timedatectl set-ntp true
 lsblk
 read -p "Enter drive (Ex. - /dev/sda): " drive
 cfdisk $drive
@@ -19,6 +16,11 @@ read -p "Enter username: " username
 read -p "Enter password: " password
 echo "Amd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users."
 read -p "Enter which graphics driver you use (Enter \"N\" for Nvidia or \"n\" for Legacy Nvidia Drivers (Driver 390): " nvidia
+sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
+pacman --noconfirm -Sy archlinux-keyring reflector
+iso=$(curl -4 ifconfig.co/country-iso)
+reflector -a 48 -c $iso -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist
+timedatectl set-ntp true
 mkfs.btrfs -fL Linux $linux
 mount $linux /mnt
 case $swapcreation in
@@ -140,4 +142,5 @@ esac
 #                                         org.flameshot.Flameshot org.gimp.Gimp org.libreoffice.LibreOffice \
 #                                         org.polymc.PolyMC org.qbittorrent.qBittorrent sh.ppy.osu
 # EOF
+sed -i '$d' /mnt/etc/sudoers
 exit
