@@ -105,10 +105,15 @@ git clone --depth=1 --separate-git-dir=.dotfiles https://github.com/ghoulboii/do
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
 rm -rf tmpdotfiles
 /usr/bin/git --git-dir=~/.dotfiles/ --work-tree=~ config --local status.showUntrackedFiles no
+ln -sf ~/.config/shell/profile ~/.zprofile
 
 # DWM (Window manager)
 git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
 sudo make -sC ~/.local/src/dwm install
+
+# DWMBLOCKS (Status bar)
+git clone --depth=1 https://github.com/ghoulboii/dwmblocks ~/.local/src/dwmblocks
+sudo make -sC ~/.local/src/dwmblocks install
 
 # YAY (AUR helper)
 git clone --depth=1 https://aur.archlinux.org/yay-bin.git ~/.local/src/yay
