@@ -23,10 +23,28 @@ reflector -a 48 -c $iso -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist
 timedatectl set-ntp true
 mkfs.btrfs -fL Linux $linux
 mount $linux /mnt
+btrfs su cr /mnt/@
+btrfs su cr /mnt/@home
+btrfs su cr /mnt/@var
+btrfs su cr /mnt/@tmp
+btrfs su cr /mnt/@.snapshots
+umount /mnt
+mount -o noatime,compress=zstd:2,space_cache,subvol=@root $linux /mnt
+mkdir /mnt/{boot,home,var,tmp,.snapshots}
+mount -o noatime,compress=zstd:2,space_cache,subvol=@home $linux /mnt/home
+mount -o nodatacow,subvol=@var $linux /mnt/var
+mount -o noatime,compress=zstd:2,space_cache,subvol=@tmp $linux /mnt/tmp
+mount -o noatime,compress=zstd:2,space_cache,subvol=@.snapshots $linux /mnt/.snapshots
 case $swapcreation in
   /dev/*)
-    mkswap $swapcreation
-    swapon $swapcreation
+    mkdir -p /mnt/opt/swap # make a dir that we can apply NOCOW to to make it btrfs-friendly.
+    chattr +C /mnt/opt/swap # apply NOCOW, btrfs needs that.
+    dd if=/dev/zero of=/mnt/opt/swap/swapfile bs=1M count=2048 status=progress
+    chmod 600 /mnt/opt/swap/swapfile # set permissions.
+    chown root /mnt/opt/swap/swapfile
+    mkswap /mnt/opt/swap/swapfile
+    swapon /mnt/opt/swap/swapfile
+    echo "/opt/swap/swapfile	none	swap	sw	0	0" >> /mnt/etc/fstab # Add swap to fstab, so it KEEPS working after installation.
     ;;
 esac
 case $bios in
@@ -60,7 +78,7 @@ echo $hostname > /mnt/etc/hostname
 echo "127.0.0.1 localhost" >> /mnt/etc/hosts
 echo "::1       localhost" >> /mnt/etc/hosts
 echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
-
+sed 's/MODULES=/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
 arch-chroot /mnt <<EOF
 echo "root:$password" | chpasswd
 EOF
