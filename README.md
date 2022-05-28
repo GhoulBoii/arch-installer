@@ -4,8 +4,11 @@ Automated Arch Linux Installer for Different Scenarios and Scemes.
 
 ## TODO
 
-- [ ] Btrfs Subvolumes
-- [ ] Flatpak packages
+- [x] Adding all user input to the start
+- [x] BTRFS Subvolumes
+- [x] Adding .local and other directories
+- [x] Doom Emacs Install
+- [x] Flatpak packages
 
 ## License 
 

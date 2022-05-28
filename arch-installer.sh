@@ -117,13 +117,14 @@ echo -e "$username ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" >>
 clear
 arch-chroot /mnt sudo -i -u $username bash <<EOF
 cd
-
 # DOTFILES
 git clone --depth=1 --separate-git-dir=.dots https://github.com/ghoulboii/dotfiles.git tmpdotfiles
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
 rm -rf tmpdotfiles
 /usr/bin/git --git-dir=~/.dotfiles/ --work-tree=~ config --local status.showUntrackedFiles no
 ln -sf ~/.config/shell/profile ~/.zprofile
+mkdir ~/{dl,doc,music,pics}
+xdg-user-dirs-update
 
 # DWM (Window manager)
 git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
@@ -137,7 +138,6 @@ sudo make -sC ~/.local/src/dwmblocks install
 git clone --depth=1 https://aur.archlinux.org/yay-bin.git ~/.local/src/yay
 cd ~/.local/src/yay
 makepkg --noconfirm -rsi
-cd
 rm -rf ~/.local/src/yay
 
 # DOOM EMACS (CODE EDITOR)
@@ -152,18 +152,12 @@ sudo -i -u $username yay -S --noconfirm autojump-rs devour jdk-temurin jdk8-adop
 EOF
 case $nvidia in
   N)
-    arch-chroot /mnt sudo -i -u $username yay -S nvidia-dkms nvidia-utils lib32-nvidia-utils
+    arch-chroot /mnt sudo -i -u $username yay -S --noconfirm nvidia-dkms nvidia-utils lib32-nvidia-utils
     ;;
   n)
-    arch-chroot /mnt sudo -i -u $username yay -S nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
+    arch-chroot /mnt sudo -i -u $username yay -S --noconfirm nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
     ;;
 esac
 
-# arch-chroot /mnt <<EOF
-# sudo -i -u $username flatpak install -y com.brave.Browser com.github.tchx84.Flatseal \
-#                                         com.github.wwmm.easyeffects com.valvesoftware.Steam \
-#                                         org.flameshot.Flameshot org.gimp.Gimp org.libreoffice.LibreOffice \
-#                                         org.polymc.PolyMC org.qbittorrent.qBittorrent sh.ppy.osu
-# EOF
 sed -i '$d' /mnt/etc/sudoers
 exit
