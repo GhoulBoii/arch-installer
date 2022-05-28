@@ -9,7 +9,7 @@ read -p "Enter drive (Ex. - /dev/sda): " drive
 cfdisk $drive
 lsblk
 read -p "Enter the Linux Partition (Ex. - /dev/sda2): " linux
-read -p "Enter SWAP partition (Skip if no SWAP): " swapcreation
+read -p "Would you like swap? (y/n)" swapcreation
 read -p "Enter EFI partition (Skip if using BIOS): " bios
 read -p "Enter the hostname: " hostname
 read -p "Enter username: " username
@@ -23,20 +23,20 @@ reflector -a 48 -c $iso -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist
 timedatectl set-ntp true
 mkfs.btrfs -fL Linux $linux
 mount $linux /mnt
-btrfs su cr /mnt/@
-btrfs su cr /mnt/@home
-btrfs su cr /mnt/@var
-btrfs su cr /mnt/@tmp
-btrfs su cr /mnt/@.snapshots
+btrfs subvolume create /mnt/@
+btrfs subvolume create /mnt/@home
+btrfs subvolume create /mnt/@var
+btrfs subvolume create /mnt/@tmp
+btrfs subvolume create /mnt/@.snapshots
 umount /mnt
 mount -o noatime,compress=zstd:2,space_cache,subvol=@root $linux /mnt
-mkdir /mnt/{boot,home,var,tmp,.snapshots}
+mkdir /mnt/{home,var,tmp,.snapshots}
 mount -o noatime,compress=zstd:2,space_cache,subvol=@home $linux /mnt/home
 mount -o nodatacow,subvol=@var $linux /mnt/var
 mount -o noatime,compress=zstd:2,space_cache,subvol=@tmp $linux /mnt/tmp
-mount -o noatime,compress=zstd:2,space_cache,subvol=@.snapshots $linux /mnt/.snapshots
+mount -o noatime,subvol=@.snapshots $linux /mnt/.snapshots
 case $swapcreation in
-  /dev/*)
+  y)
     mkdir -p /mnt/opt/swap # make a dir that we can apply NOCOW to to make it btrfs-friendly.
     chattr +C /mnt/opt/swap # apply NOCOW, btrfs needs that.
     dd if=/dev/zero of=/mnt/opt/swap/swapfile bs=1M count=2048 status=progress
@@ -119,7 +119,7 @@ arch-chroot /mnt sudo -i -u $username bash <<EOF
 cd
 
 # DOTFILES
-git clone --depth=1 --separate-git-dir=.dotfiles https://github.com/ghoulboii/dotfiles.git tmpdotfiles
+git clone --depth=1 --separate-git-dir=.dots https://github.com/ghoulboii/dotfiles.git tmpdotfiles
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
 rm -rf tmpdotfiles
 /usr/bin/git --git-dir=~/.dotfiles/ --work-tree=~ config --local status.showUntrackedFiles no
