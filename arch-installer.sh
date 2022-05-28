@@ -9,7 +9,7 @@ read -p "Enter drive (Ex. - /dev/sda): " drive
 cfdisk $drive
 lsblk
 read -p "Enter the Linux Partition (Ex. - /dev/sda2): " linux
-read -p "Would you like swap? (y/n)" swapcreation
+read -p "Would you like swap? (Answer y for swap): " swapcreation
 read -p "Enter EFI partition (Skip if using BIOS): " bios
 read -p "Enter the hostname: " hostname
 read -p "Enter username: " username
@@ -29,11 +29,11 @@ btrfs subvolume create /mnt/@var
 btrfs subvolume create /mnt/@tmp
 btrfs subvolume create /mnt/@.snapshots
 umount /mnt
-mount -o noatime,compress=zstd:2,space_cache,subvol=@root $linux /mnt
+mount -o noatime,compress=zstd:2,subvol=@ $linux /mnt
 mkdir /mnt/{home,var,tmp,.snapshots}
-mount -o noatime,compress=zstd:2,space_cache,subvol=@home $linux /mnt/home
+mount -o noatime,compress=zstd:2,subvol=@home $linux /mnt/home
 mount -o nodatacow,subvol=@var $linux /mnt/var
-mount -o noatime,compress=zstd:2,space_cache,subvol=@tmp $linux /mnt/tmp
+mount -o noatime,compress=zstd:2,subvol=@tmp $linux /mnt/tmp
 mount -o noatime,subvol=@.snapshots $linux /mnt/.snapshots
 case $swapcreation in
   y)
