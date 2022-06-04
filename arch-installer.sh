@@ -2,6 +2,7 @@
 clear
 echo -e "\e[1;32mGhoulBoi's Arch Installer\e[0m"
 echo -e "\e[1;32mPart 1: Partition Setup\e[0m"
+script arch-installer.log &> /dev/null
 
 lsblk
 read -p "Enter drive (Ex. - /dev/sda): " drive
@@ -93,14 +94,14 @@ echo "::1       localhost" >> /mnt/etc/hosts
 echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
 sed 's/MODULES=/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
 arch-chroot /mnt <<EOF
-echo "root:$password" | chpasswd
+echo "root:$pass1" | chpasswd
 EOF
 
 echo -e "\e[1;32mPACMAN PACKAGES\e[0m"
 arch-chroot /mnt <<EOF
 pacman -Sy --noconfirm bridge-utils btop dash dnsmasq dunst emacs feh flatpak \
-                       gamemode git grub lib32-pipewire libvirt linux-zen-headers lutris man-db \
-                       mesa mesa-utils mpv ncdu neofetch neovim networkmanager ntfs-3g \
+                       gamemode git grub lazygit lib32-pipewire libvirt linux-zen-headers lutris man-db \
+                       mesa mesa-utils mpv ncdu neofetch neovim networkmanager npm ntfs-3g \
                        openbsd-netcat openssh os-prober pcmanfm pipewire pipewire-pulse playerctl \
                        python-pywal qemu-desktop reflector ripgrep rofi rsync tlp vde2 \
                        virt-manager virt-viewer wezterm wine-nine wine-staging \
@@ -127,7 +128,7 @@ arch-chroot /mnt systemctl enable NetworkManager tlp reflector.timer
 arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
 arch-chroot /mnt usermod -aG libvirt $username
 arch-chroot /mnt <<EOF
-echo "$username:$password" | chpasswd
+echo "$username:$pass1" | chpasswd
 EOF
 echo -e "$username ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" >> /mnt/etc/sudoers
 
@@ -178,4 +179,7 @@ case $nvidia in
 esac
 
 sed -i '$d' /mnt/etc/sudoers
+cp post-install.sh /mnt/home/$username/post-install.sh
+rm -rf /mnt/home/$username/.bash*
+echo -e "\e[1;35mSCRIPT FINISHED! REBOOT NOW...\e[0m"
 exit
