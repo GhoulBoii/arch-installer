@@ -1,9 +1,9 @@
 #!/usr/bin/env bash 
-# Part 1: Partition Setup
-
 clear
-echo "GhoulBoi's Arch Installer"
-echo "Part 1: Partition Setup"
+echo -e "\e[1;32mGhoulBoi's Arch Installer"
+echo -e "\e[1;32mPart 1: Partition Setup"
+
+# USER INPUT
 lsblk
 read -p "Enter drive (Ex. - /dev/sda): " drive
 cfdisk $drive
@@ -17,10 +17,12 @@ read -p "Enter password: " password
 echo "Amd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users."
 read -p "Enter which graphics driver you use (Enter \"N\" for Nvidia or \"n\" for Legacy Nvidia Drivers (Driver 390): " nvidia
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
+
 pacman --noconfirm -Sy archlinux-keyring reflector
-iso=$(curl -4 ifconfig.co/country-iso)
-reflector -a 48 -c $iso -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist
+reflector -a 48 -c $(curl -4 ifconfig.co/country-iso)iso -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist
 timedatectl set-ntp true
+
+echo -e "\e[1;36mCREATING SUBVOLUMES"
 mkfs.btrfs -fL Linux $linux
 mount $linux /mnt
 btrfs subvolume create /mnt/@
@@ -29,7 +31,9 @@ btrfs subvolume create /mnt/@var
 btrfs subvolume create /mnt/@tmp
 btrfs subvolume create /mnt/@.snapshots
 umount /mnt
-mount -o noatime,compress=zstd:2,subvol=@ $linux /mnt
+
+echo -e "\e[1;36mMOUNTING SUBVOLUMES"
+mount -o noatime,discard=async,compress=zstd:2,subvol=@ $linux /mnt
 mkdir /mnt/{home,var,tmp,.snapshots}
 mount -o noatime,compress=zstd:2,subvol=@home $linux /mnt/home
 mount -o nodatacow,subvol=@var $linux /mnt/var
@@ -53,7 +57,8 @@ case $bios in
     mdkir /mnt/boot
     mount $bios /mnt/boot
     ;;
-esac 
+esac
+
 pacstrap /mnt base base-devel linux-zen linux-firmware btrfs-progs intel-ucode 
 genfstab -U /mnt >> /mnt/etc/fstab
 
@@ -62,13 +67,13 @@ genfstab -U /mnt >> /mnt/etc/fstab
 clear
 echo "Part 2: Base System"
 
-# Pacman Config
+# PACMAN CONFIG
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /mnt/etc/pacman.conf
 grep -q "ILoveCandy" /mnt/etc/pacman.conf || sed -i "/#VerbosePkgLists/a ILoveCandy" /mnt/etc/pacman.conf
 sed -i "/^#ParallelDownloads/s/=.*/= 5/;s/^#Color$/Color/" /mnt/etc/pacman.conf
 echo -e "\n[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /mnt/etc/pacman.conf
 
-# Locale and Hosts
+# LOCALE & HOSTS
 ln -sf /mnt/usr/share/zoneinfo/Asia/Kolkata /mnt/etc/localtime
 arch-chroot /mnt hwclock --systohc
 echo "en_US.UTF-8 UTF-8" >> /mnt/etc/locale.gen
@@ -82,6 +87,8 @@ sed 's/MODULES=/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
 arch-chroot /mnt <<EOF
 echo "root:$password" | chpasswd
 EOF
+
+# PACMAN PKGS
 arch-chroot /mnt <<EOF
 pacman -Sy --noconfirm bridge-utils btop dash dnsmasq dunst emacs feh flatpak \
                        gamemode git grub lib32-pipewire libvirt linux-zen-headers lutris man-db \
@@ -145,11 +152,14 @@ git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs/
 ~/.config/emacs/bin/doom -y install
 EOF
 
+# AUR PKGS
 arch-chroot /mnt <<EOF
-sudo -i -u $username yay -S --noconfirm autojump-rs devour jdk-temurin jdk8-adoptopenjdk \
+sudo -i -u $username yay -S --noconfirm autojump-rs devour jdk-temurin \
                                         lf-bin nerd-fonts-hack optimus-manager  \
                                         ttf-ms-fonts zsh-fast-syntax-highlighting
 EOF
+
+# NVIDIA DRIVERS
 case $nvidia in
   N)
     arch-chroot /mnt sudo -i -u $username yay -S --noconfirm nvidia-dkms nvidia-utils lib32-nvidia-utils
