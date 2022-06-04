@@ -1,7 +1,7 @@
 #!/usr/bin/env bash 
 clear
-echo -e "\e[1;32mGhoulBoi's Arch Installer"
-echo -e "\e[1;32mPart 1: Partition Setup"
+echo -e "\e[1;32mGhoulBoi's Arch Installer\e[0m"
+echo -e "\e[1;32mPart 1: Partition Setup\e[0m"
 
 lsblk
 read -p "Enter drive (Ex. - /dev/sda): " drive
@@ -15,13 +15,13 @@ read -p "Enter username: " username
 read -sp "Enter password: " pass1
 echo ""
 read -sp "Re-enter password: " pass2
-while ! [ "$pass1" = "$pass2"]; do 
+while ! [ "$pass1" = "$pass2" ]; do 
   echo -e "\n Passwords don't match."
   read -sp "Enter password: " pass1
   echo ""
   read -sp "Re-enter password: " pass2
 done
-echo "\nAmd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users."
+echo -e "\nAmd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users."
 read -p "Enter which graphics driver you use (Enter \"1\" for Nvidia or \"2\" for Legacy Nvidia Drivers (Driver 390): " nvidia
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
 
@@ -29,7 +29,7 @@ pacman --noconfirm -Sy archlinux-keyring reflector
 reflector -a 48 -c $(curl -4 ifconfig.co/country-iso)iso -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist
 timedatectl set-ntp true
 
-echo -e "\e[1;36mCREATING SUBVOLUMES"
+echo -e "\e[1;36mCREATING SUBVOLUMES\e[0m"
 mkfs.btrfs -fL Linux $linux
 mount $linux /mnt
 btrfs subvolume create /mnt/@
@@ -39,7 +39,7 @@ btrfs subvolume create /mnt/@tmp
 btrfs subvolume create /mnt/@.snapshots
 umount /mnt
 
-echo -e "\e[1;36mMOUNTING SUBVOLUMES"
+echo -e "\e[1;36mMOUNTING SUBVOLUMES\e[0m"
 mount -o noatime,discard=async,compress=zstd:2,subvol=@ $linux /mnt
 mkdir /mnt/{home,var,tmp,.snapshots}
 mount -o noatime,compress=zstd:2,subvol=@home $linux /mnt/home
@@ -49,7 +49,7 @@ mount -o noatime,subvol=@.snapshots $linux /mnt/.snapshots
 
 case $swapcreation in
   y)
-    echo -e "\e[1;36mCREATING SWAP"
+    echo -e "\e[1;36mCREATING SWAP\e[0m"
     mkdir -p /mnt/opt/swap # make a dir that we can apply NOCOW to to make it btrfs-friendly.
     chattr +C /mnt/opt/swap # apply NOCOW, btrfs needs that.
     dd if=/dev/zero of=/mnt/opt/swap/swapfile bs=1M count=2048 status=progress
@@ -62,21 +62,21 @@ case $swapcreation in
 esac
 case $bios in
   /dev/*)
-    echo -e "\e[1;36mCREATING UEFI PARTITION"
+    echo -e "\e[1;36mCREATING UEFI PARTITION\e[0m"
     mkfs.fat -F 32 $bios
     mdkir /mnt/boot
     mount $bios /mnt/boot
     ;;
 esac
 
-echo -e "\e[1;36mINSTALLING BASIC PACKAGES"
+echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
 pacstrap /mnt base base-devel linux-zen linux-firmware btrfs-progs intel-ucode 
 genfstab -U /mnt >> /mnt/etc/fstab
 
 clear
-echo -e "\e[1;32mPart 2: Base System"
+echo -e "\e[1;32mPart 2: Base System\e[0m"
 
-echo -e "\e[1;32PACMAN CONFIG"
+echo -e "\e[1;32PACMAN CONFIG\e[0m"
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /mnt/etc/pacman.conf
 grep -q "ILoveCandy" /mnt/etc/pacman.conf || sed -i "/#VerbosePkgLists/a ILoveCandy" /mnt/etc/pacman.conf
 sed -i "/^#ParallelDownloads/s/=.*/= 5/;s/^#Color$/Color/" /mnt/etc/pacman.conf
@@ -96,7 +96,7 @@ arch-chroot /mnt <<EOF
 echo "root:$password" | chpasswd
 EOF
 
-echo -e "\e[1;32mPACMAN PACKAGES"
+echo -e "\e[1;32mPACMAN PACKAGES\e[0m"
 arch-chroot /mnt <<EOF
 pacman -Sy --noconfirm bridge-utils btop dash dnsmasq dunst emacs feh flatpak \
                        gamemode git grub lib32-pipewire libvirt linux-zen-headers lutris man-db \
@@ -111,7 +111,7 @@ pacman -Sy --noconfirm bridge-utils btop dash dnsmasq dunst emacs feh flatpak \
                        zsh zsh-autosuggestions
 EOF
 
-echo -e "\e[1;32mGRUB"
+echo -e "\e[1;32mGRUB\e[0m"
 case $bios in
      /dev/*)
         arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
@@ -122,7 +122,7 @@ case $bios in
     ;;
 esac
 
-echo -e "\e[1;32mUSER CREATION"
+echo -e "\e[1;32mUSER CREATION\e[0m"
 arch-chroot /mnt systemctl enable NetworkManager tlp reflector.timer
 arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
 arch-chroot /mnt usermod -aG libvirt $username
@@ -131,12 +131,12 @@ echo "$username:$password" | chpasswd
 EOF
 echo -e "$username ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" >> /mnt/etc/sudoers
 
-echo -e "\e[1;35mPart 3: Graphical Interface"
+echo -e "\e[1;35mPart 3: Graphical Interface\e[0m"
 clear
 
 arch-chroot /mnt sudo -i -u $username bash <<EOF
 cd
-echo -e "\e[1;35mDOTFILES"
+echo -e "\e[1;35mDOTFILES\e[0m"
 git clone --depth=1 --separate-git-dir=.dots https://github.com/ghoulboii/dotfiles.git tmpdotfiles
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
 rm -rf tmpdotfiles
@@ -145,29 +145,29 @@ ln -sf ~/.config/shell/profile ~/.zprofile
 mkdir ~/{dl,doc,music,pics}
 xdg-user-dirs-update
 
-echo -e "\e[1;35m# DWM"
+echo -e "\e[1;35m# DWM\e[0m"
 git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
 sudo make -sC ~/.local/src/dwm install
 
-echo -e "\e[1;35mDWMBLOCKS"
+echo -e "\e[1;35mDWMBLOCKS\e[0m"
 git clone --depth=1 https://github.com/ghoulboii/dwmblocks ~/.local/src/dwmblocks
 sudo make -sC ~/.local/src/dwmblocks install
 
-echo -e "\e[1;35mYAY"
+echo -e "\e[1;35mYAY\e[0m"
 git clone --depth=1 https://aur.archlinux.org/yay-bin.git ~/.local/src/yay
 cd ~/.local/src/yay
 makepkg --noconfirm -rsi
 rm -rf ~/.local/src/yay
 EOF
 
-echo -e "\e[1;35mAUR PACKAGES"
+echo -e "\e[1;35mAUR PACKAGES\e[0m"
 arch-chroot /mnt <<EOF
 sudo -i -u $username yay -S --noconfirm autojump-rs devour jdk-temurin \
                                         lf-bin nerd-fonts-hack optimus-manager  \
                                         ttf-ms-fonts zsh-fast-syntax-highlighting
 EOF
 
-echo -e "\e[1;35mNVIDIA DRIVERS"
+echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
 case $nvidia in
   1)
     arch-chroot /mnt sudo -i -u $username yay -S --noconfirm nvidia-dkms nvidia-utils lib32-nvidia-utils
