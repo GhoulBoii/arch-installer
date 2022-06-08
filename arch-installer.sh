@@ -181,5 +181,10 @@ esac
 sed -i '$d' /mnt/etc/sudoers
 cp post-install.sh /mnt/home/$username/post-install.sh
 rm -rf /mnt/home/$username/.bash*
-echo -e "\e[1;35mSCRIPT FINISHED! REBOOT NOW...\e[0m"
-exit
+for i in {5..1}
+do
+  echo -e "\e[1;35mREBOOTING IN $i SECONDS...\e[0m"
+  sleep 1
+done
+echo -e "\e[1;35mSCRIPT FINISHED! REBOOTING NOW...\e[0m"
+reboot 
