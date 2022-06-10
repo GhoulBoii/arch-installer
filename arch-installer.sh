@@ -2,7 +2,6 @@
 clear
 echo -e "\e[1;32mGhoulBoi's Arch Installer\e[0m"
 echo -e "\e[1;32mPart 1: Partition Setup\e[0m"
-script arch-installer.log &> /dev/null
 
 lsblk
 read -p "Enter drive (Ex. - /dev/sda): " drive
@@ -77,7 +76,7 @@ genfstab -U /mnt >> /mnt/etc/fstab
 clear
 echo -e "\e[1;32mPart 2: Base System\e[0m"
 
-echo -e "\e[1;32PACMAN CONFIG\e[0m"
+echo -e "\e[1;32\PACMAN CONFIG\e[0m"
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /mnt/etc/pacman.conf
 grep -q "ILoveCandy" /mnt/etc/pacman.conf || sed -i "/#VerbosePkgLists/a ILoveCandy" /mnt/etc/pacman.conf
 sed -i "/^#ParallelDownloads/s/=.*/= 5/;s/^#Color$/Color/" /mnt/etc/pacman.conf
@@ -92,7 +91,7 @@ echo $hostname > /mnt/etc/hostname
 echo "127.0.0.1 localhost" >> /mnt/etc/hosts
 echo "::1       localhost" >> /mnt/etc/hosts
 echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
-sed 's/MODULES=/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
+sed -i 's/MODULES=/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
 arch-chroot /mnt <<EOF
 echo "root:$pass1" | chpasswd
 EOF
