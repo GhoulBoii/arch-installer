@@ -91,7 +91,7 @@ echo $hostname > /mnt/etc/hostname
 echo "127.0.0.1 localhost" >> /mnt/etc/hosts
 echo "::1       localhost" >> /mnt/etc/hosts
 echo "127.0.1.1 $hostname.localdomain $hostname" >> /mnt/etc/hosts
-sed -i 's/MODULES=/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
+sed -i 's/MODULES=()/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
 arch-chroot /mnt <<EOF
 echo "root:$pass1" | chpasswd
 EOF
@@ -145,7 +145,7 @@ ln -sf ~/.config/shell/profile ~/.zprofile
 mkdir ~/{dl,doc,music,pics}
 xdg-user-dirs-update
 
-echo -e "\e[1;35m# DWM\e[0m"
+echo -e "\e[1;35mDWM\e[0m"
 git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
 sudo make -sC ~/.local/src/dwm install
 
@@ -163,16 +163,17 @@ EOF
 echo -e "\e[1;35mAUR PACKAGES\e[0m"
 arch-chroot /mnt <<EOF
 sudo -i -u $username yay -S --noconfirm autojump-rs devour jdk-temurin \
-                                        lf-bin nerd-fonts-hack optimus-manager  \
+                                        lf-bin nerd-fonts-hack noisetorch optimus-manager  \
                                         ttf-ms-fonts zsh-fast-syntax-highlighting
 EOF
 
-echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
 case $nvidia in
   1)
+    echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
     arch-chroot /mnt sudo -i -u $username yay -S --noconfirm nvidia-dkms nvidia-utils lib32-nvidia-utils
     ;;
   2)
+    echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
     arch-chroot /mnt sudo -i -u $username yay -S --noconfirm nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
     ;;
 esac
