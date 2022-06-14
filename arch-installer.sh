@@ -10,17 +10,35 @@ lsblk
 read -p "Enter the Linux Partition (Ex. - /dev/sda2): " linux
 read -p "Would you like swap? (Answer y for swap): " swapcreation
 read -p "Enter EFI partition (Ex. - /dev/sda2): " bios
-read -p "Enter the hostname: " hostname
-read -p "Enter username: " username
-read -sp "Enter password: " pass1
-echo ""
-read -sp "Re-enter password: " pass2
-while ! [ "$pass1" = "$pass2" ]; do 
-  echo -e "\n Passwords don't match."
+while true :; do 
+  read -p "Enter the hostname: " hostname
+  if [[ "${hostname}" =~ ^[a-z][a-z0-9_.-]{0,62}[a-z0-9]$ ]]
+  then
+    break
+  fi 
+  echo -e "\e[1;31mIncorrect Hostname!\e[0m"
+done
+
+while true :; do
+  read -p "Enter username: " username
+  if [[ "${username}" =~ ^[a-z_]([a-z0-9_-]{0,31}|[a-z0-9_-]{0,30}\$)$ ]]
+  then
+    break
+  fi 
+  echo -e "\e[1;31mIncorrect Username!\e[0m"
+done
+
+while true :; do 
   read -sp "Enter password: " pass1
   echo ""
   read -sp "Re-enter password: " pass2
+  if [[ "${pass1}" = "${pass2}" ]]
+  then
+    break
+  fi
+    echo -e "\n\e[1;31mPasswords don't match.\e[0m"
 done
+
 echo -e "\nAmd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users."
 read -p "Enter which graphics driver you use (Enter \"1\" for Nvidia or \"2\" for Legacy Nvidia Drivers (Driver 390): " nvidia
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
@@ -34,6 +52,7 @@ mkfs.btrfs -fL Linux $linux
 mount $linux /mnt
 btrfs subvolume create /mnt/@
 btrfs subvolume create /mnt/@home
+btrfs subvolume create /mnt/@swap
 btrfs subvolume create /mnt/@var
 btrfs subvolume create /mnt/@tmp
 btrfs subvolume create /mnt/@.snapshots
@@ -41,8 +60,9 @@ umount /mnt
 
 echo -e "\e[1;36mMOUNTING SUBVOLUMES\e[0m"
 mount -o noatime,discard=async,compress=zstd:2,subvol=@ $linux /mnt
-mkdir /mnt/{home,var,tmp,.snapshots}
+mkdir /mnt/{home,swap,var,tmp,.snapshots}
 mount -o noatime,compress=zstd:2,subvol=@home $linux /mnt/home
+mount -o nodatacow,subvol=@swap $linux /mnt/swap
 mount -o nodatacow,subvol=@var $linux /mnt/var
 mount -o noatime,compress=zstd:2,subvol=@tmp $linux /mnt/tmp
 mount -o noatime,subvol=@.snapshots $linux /mnt/.snapshots
@@ -50,14 +70,11 @@ mount -o noatime,subvol=@.snapshots $linux /mnt/.snapshots
 case $swapcreation in
   y)
     echo -e "\e[1;36mCREATING SWAP\e[0m"
-    mkdir -p /mnt/opt/swap # make a dir that we can apply NOCOW to to make it btrfs-friendly.
-    chattr +C /mnt/opt/swap # apply NOCOW, btrfs needs that.
-    dd if=/dev/zero of=/mnt/opt/swap/swapfile bs=1M count=2048 status=progress
-    chmod 600 /mnt/opt/swap/swapfile # set permissions.
-    chown root /mnt/opt/swap/swapfile
-    mkswap /mnt/opt/swap/swapfile
-    swapon /mnt/opt/swap/swapfile
-    echo "/opt/swap/swapfile	none	swap	sw	0	0" >> /mnt/etc/fstab # Add swap to fstab, so it KEEPS working after installation.
+    dd if=/dev/zero of=/mnt/swap/swapfile bs=1M count=2048 status=progress
+    chmod 600 /mnt/swap/swapfile # set permissions.
+    chown root /mnt/swap/swapfile
+    mkswap /mnt/swap/swapfile
+    swapon /mnt/swap/swapfile
     ;;
 esac
 case $bios in
@@ -80,7 +97,7 @@ echo -e "\e[1;32\PACMAN CONFIG\e[0m"
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /mnt/etc/pacman.conf
 grep -q "ILoveCandy" /mnt/etc/pacman.conf || sed -i "/#VerbosePkgLists/a ILoveCandy" /mnt/etc/pacman.conf
 sed -i "/^#ParallelDownloads/s/=.*/= 5/;s/^#Color$/Color/" /mnt/etc/pacman.conf
-echo -e "\n[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /mnt/etc/pacman.conf
+sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
 
 ln -sf /mnt/usr/share/zoneinfo/Asia/Kolkata /mnt/etc/localtime
 arch-chroot /mnt hwclock --systohc
@@ -102,7 +119,7 @@ pacman -Sy --noconfirm bridge-utils btop dash dnsmasq dunst emacs feh flatpak \
                        gamemode git grub lazygit lib32-pipewire libvirt linux-zen-headers lutris man-db \
                        mesa mesa-utils mpv ncdu neofetch neovim networkmanager npm ntfs-3g \
                        openbsd-netcat openssh os-prober pcmanfm pipewire pipewire-pulse playerctl \
-                       python-pywal qemu-desktop reflector ripgrep rofi rsync tlp vde2 \
+                       python-pywal qemu-desktop reflector ripgrep rofi rsync snapper tlp vde2 \
                        virt-manager virt-viewer wezterm wine-nine wine-staging \
                        winetricks wireplumber xbindkeys xclip \
                        xcompmgr xdg-desktop-portal-gtk xdg-user-dirs xdg-utils \
@@ -134,6 +151,10 @@ echo -e "$username ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" >>
 echo -e "\e[1;35mPart 3: Graphical Interface\e[0m"
 clear
 
+nc=$(grep -c ^processor /proc/cpuinfo)
+sed -i "s/#MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j$nc\"/g" /mnt/etc/makepkg.conf
+sed -i "s/COMPRESSXZ=(xz -c -z -)/COMPRESSXZ=(xz -c -T $nc -z -)/g" /mnt/etc/makepkg.conf
+
 arch-chroot /mnt sudo -i -u $username bash <<EOF
 cd
 echo -e "\e[1;35mDOTFILES\e[0m"
@@ -164,7 +185,7 @@ echo -e "\e[1;35mAUR PACKAGES\e[0m"
 arch-chroot /mnt <<EOF
 sudo -i -u $username yay -S --noconfirm autojump-rs devour jdk-temurin \
                                         lf-bin nerd-fonts-hack noisetorch optimus-manager  \
-                                        ttf-ms-fonts zsh-fast-syntax-highlighting
+                                        trash-cli ttf-ms-fonts zsh-fast-syntax-highlighting
 EOF
 
 case $nvidia in
