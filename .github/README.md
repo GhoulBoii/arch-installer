@@ -2,10 +2,12 @@
 
 Automated Arch Linux Installer for Different Scenarios and Scemes.
 
-## USAGE
+## Usage
 
 ```
+pacman -Sy git
 git clone https://github.com/ghoulboii/arch-installer
+cd arch-installer
 ./arch-installer.sh
 reboot
 ./post-installer.sh
@@ -19,6 +21,8 @@ reboot
 - [x] Doom Emacs Install
 - [ ] /etc Files
 - [x] Flatpak packages
+- [ ] Sleek Grub Theme
+- [ ] Snapper Config
 
 ## License 
 

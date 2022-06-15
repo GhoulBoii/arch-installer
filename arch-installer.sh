@@ -9,7 +9,9 @@ cfdisk $drive
 lsblk
 read -p "Enter the Linux Partition (Ex. - /dev/sda2): " linux
 read -p "Would you like swap? (Answer y for swap): " swapcreation
-read -p "Enter EFI partition (Ex. - /dev/sda2): " bios
+if [[ -d "/sys/firmware/efi" ]]; then
+  read -p "Enter EFI partition (Ex. - /dev/sda2): " efi
+fi
 while true :; do 
   read -p "Enter the hostname: " hostname
   if [[ "${hostname}" =~ ^[a-z][a-z0-9_.-]{0,62}[a-z0-9]$ ]]
@@ -118,18 +120,18 @@ arch-chroot /mnt <<EOF
 pacman -Sy --noconfirm bridge-utils btop dash dnsmasq dunst emacs feh flatpak \
                        gamemode git grub lazygit lib32-pipewire libvirt linux-zen-headers lutris man-db \
                        mesa mesa-utils mpv ncdu neofetch neovim networkmanager npm ntfs-3g \
-                       openbsd-netcat openssh os-prober pcmanfm pipewire pipewire-pulse playerctl \
+                       openbsd-netcat openssh os-prober pcmanfm picom pipewire pipewire-pulse playerctl \
                        python-pywal qemu-desktop reflector ripgrep rofi rsync snapper tlp vde2 \
                        virt-manager virt-viewer wezterm wine-nine wine-staging \
                        winetricks wireplumber xbindkeys xclip \
-                       xcompmgr xdg-desktop-portal-gtk xdg-user-dirs xdg-utils \
+                       xdg-desktop-portal-gtk xdg-user-dirs xdg-utils \
                        xdotool xf86-input-libinput xorg-server xorg-xinit \
                        xorg-xinput xorg-xrandr xorg-xset yt-dlp \
                        zsh zsh-autosuggestions
 EOF
 
 echo -e "\e[1;32mGRUB\e[0m"
-case $bios in
+case $efi in
      /dev/*)
         arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
     ;;
@@ -140,7 +142,7 @@ case $bios in
 esac
 
 echo -e "\e[1;32mUSER CREATION\e[0m"
-arch-chroot /mnt systemctl enable NetworkManager tlp reflector.timer
+arch-chroot /mnt systemctl enable NetworkManager tlp reflector.timer libvirtd
 arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
 arch-chroot /mnt usermod -aG libvirt $username
 arch-chroot /mnt <<EOF
@@ -198,6 +200,18 @@ case $nvidia in
     arch-chroot /mnt sudo -i -u $username yay -S --noconfirm nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
     ;;
 esac
+
+# echo -e "Installing Sleek Grub theme..."
+# mkdir -p "/mnt/boot/themes/sleek"
+# cp /mnt/home/$username/ 
+# echo -e "Backing up Grub config..."
+# cp -an /etc/default/grub /etc/default/grub.bak
+# echo -e "Setting the theme as the default..."
+# grep "GRUB_THEME=" /etc/default/grub 2>&1 >/dev/null && sed -i '/GRUB_THEME=/d' /etc/default/grub
+# echo "GRUB_THEME=\"${THEME_DIR}/${THEME_NAME}/theme.txt\"" >> /etc/default/grub
+# echo -e "Updating grub..."
+# grub-mkconfig -o /boot/grub/grub.cfg
+# echo -e "All set!"
 
 sed -i '$d' /mnt/etc/sudoers
 cp post-install.sh /mnt/home/$username/post-install.sh
