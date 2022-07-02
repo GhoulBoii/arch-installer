@@ -21,7 +21,7 @@ reboot
 - [x] Doom Emacs Install
 - [ ] /etc Files
 - [x] Flatpak packages
-- [ ] Sleek Grub Theme
+- [x] Sleek Grub Theme
 - [ ] Snapper Config
 
 ## License 

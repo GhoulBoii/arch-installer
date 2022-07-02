@@ -117,13 +117,13 @@ EOF
 
 echo -e "\e[1;32mPACMAN PACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-pacman -Sy --noconfirm bridge-utils btop dash dnsmasq dunst emacs feh flatpak \
-                       gamemode git grub lazygit lib32-pipewire libvirt linux-zen-headers lutris man-db \
-                       mesa mesa-utils mpv ncdu neofetch neovim networkmanager npm ntfs-3g \
-                       openbsd-netcat openssh os-prober pcmanfm picom pipewire pipewire-pulse playerctl \
-                       python-pywal qemu-desktop reflector ripgrep rofi rsync snapper tlp vde2 \
+pacman -Sy --noconfirm bridge-utils btop dash dnsmasq dunst feh flatpak \
+                       gamemode git grub iwd lib32-pipewire libvirt linux-zen-headers man-db \
+                       mesa mesa-utils mpv ncdu neofetch neovim npm ntfs-3g \
+                       openbsd-netcat openssh os-prober pcmanfm pipewire pipewire-pulse playerctl \
+                       python-pywal qemu-desktop reflector rofi rsync snapper tlp vde2 \
                        virt-manager virt-viewer wezterm wine-nine wine-staging \
-                       winetricks wireplumber xbindkeys xclip \
+                       winetricks wireplumber xbindkeys xclip xcompmgr \
                        xdg-desktop-portal-gtk xdg-user-dirs xdg-utils \
                        xdotool xf86-input-libinput xorg-server xorg-xinit \
                        xorg-xinput xorg-xrandr xorg-xset yt-dlp \
@@ -142,7 +142,7 @@ case $efi in
 esac
 
 echo -e "\e[1;32mUSER CREATION\e[0m"
-arch-chroot /mnt systemctl enable NetworkManager tlp reflector.timer libvirtd
+arch-chroot /mnt systemctl enable systemd-networkd systemd-resolved tlp reflector.timer libvirtd
 arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
 arch-chroot /mnt usermod -aG libvirt $username
 arch-chroot /mnt <<EOF
@@ -176,16 +176,16 @@ echo -e "\e[1;35mDWMBLOCKS\e[0m"
 git clone --depth=1 https://github.com/ghoulboii/dwmblocks ~/.local/src/dwmblocks
 sudo make -sC ~/.local/src/dwmblocks install
 
-echo -e "\e[1;35mYAY\e[0m"
-git clone --depth=1 https://aur.archlinux.org/yay-bin.git ~/.local/src/yay
-cd ~/.local/src/yay
+echo -e "\e[1;35mPARU\e[0m"
+git clone --depth=1 https://aur.archlinux.org/paru-bin.git ~/.local/src/paru
+cd ~/.local/src/paru
 makepkg --noconfirm -rsi
-rm -rf ~/.local/src/yay
+rm -rf ~/.local/src/paru
 EOF
 
 echo -e "\e[1;35mAUR PACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-sudo -i -u $username yay -S --noconfirm autojump-rs devour jdk-temurin \
+sudo -i -u $username paru -S --noconfirm autojump-rs devour jdk-temurin \
                                         lf-bin nerd-fonts-hack noisetorch optimus-manager  \
                                         trash-cli ttf-ms-fonts zsh-fast-syntax-highlighting
 EOF
@@ -193,25 +193,27 @@ EOF
 case $nvidia in
   1)
     echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
-    arch-chroot /mnt sudo -i -u $username yay -S --noconfirm nvidia-dkms nvidia-utils lib32-nvidia-utils
+    arch-chroot /mnt sudo -i -u $username paru -S --noconfirm nvidia-dkms nvidia-utils lib32-nvidia-utils
     ;;
   2)
     echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
-    arch-chroot /mnt sudo -i -u $username yay -S --noconfirm nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
+    arch-chroot /mnt sudo -i -u $username paru -S --noconfirm nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
     ;;
 esac
 
-# echo -e "Installing Sleek Grub theme..."
-# mkdir -p "/mnt/boot/themes/sleek"
-# cp /mnt/home/$username/ 
-# echo -e "Backing up Grub config..."
-# cp -an /etc/default/grub /etc/default/grub.bak
-# echo -e "Setting the theme as the default..."
-# grep "GRUB_THEME=" /etc/default/grub 2>&1 >/dev/null && sed -i '/GRUB_THEME=/d' /etc/default/grub
-# echo "GRUB_THEME=\"${THEME_DIR}/${THEME_NAME}/theme.txt\"" >> /etc/default/grub
-# echo -e "Updating grub..."
-# grub-mkconfig -o /boot/grub/grub.cfg
-# echo -e "All set!"
+echo -e "\e[1;35mInstalling Sleek Grub theme...\e[0m"
+mkdir -p /usr/share/grub/themes/
+mv /mnt/home/$username/sleek/ /usr/share/grub/themes/
+cp -an /mnt/etc/default/grub /mnt/etc/default/grub.bak
+grep "GRUB_THEME=" /mnt/etc/default/grub 2>&1 >/dev/null && sed -i '/GRUB_THEME=/d' /mnt/etc/default/grub
+echo "GRUB_THEME=\"/usr/share/grub/themes/sleek/theme.txt\"" >> /mnt/etc/default/grub
+sed -i '/GRUB_DISABLE_OS_PROBER=false/s/^#//g' /mnt/etc/default/grub
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+
+echo -e "\e[1;35m/etc Files\e[0m"
+rm -rf /mnt/etc/optimus-manager
+mv /mnt/home/$username/etc/optimus-manager /mnt/etc/
+mv /mnt/home/$username/etc/snapper/configs/config /mnt/etc/snapper/configs/
 
 sed -i '$d' /mnt/etc/sudoers
 cp post-install.sh /mnt/home/$username/post-install.sh
@@ -222,4 +224,4 @@ do
   sleep 1
 done
 echo -e "\e[1;35mSCRIPT FINISHED! REBOOTING NOW...\e[0m"
-reboot 
+reboot
