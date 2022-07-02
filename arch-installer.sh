@@ -202,8 +202,8 @@ case $nvidia in
 esac
 
 echo -e "\e[1;35mInstalling Sleek Grub theme...\e[0m"
-mkdir -p /usr/share/grub/themes/
-mv /mnt/home/$username/sleek/ /usr/share/grub/themes/
+mkdir -p /mnt/usr/share/grub/themes/
+mv /mnt/home/$username/sleek/ /mnt/usr/share/grub/themes/
 cp -an /mnt/etc/default/grub /mnt/etc/default/grub.bak
 grep "GRUB_THEME=" /mnt/etc/default/grub 2>&1 >/dev/null && sed -i '/GRUB_THEME=/d' /mnt/etc/default/grub
 echo "GRUB_THEME=\"/usr/share/grub/themes/sleek/theme.txt\"" >> /mnt/etc/default/grub
