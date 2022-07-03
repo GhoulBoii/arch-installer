@@ -4,6 +4,7 @@ Automated Arch Linux Installer for Different Scenarios and Scemes.
 
 ## Usage
 
+Get the latest archlinux [ISO](https://archlinux.org/download/) and flash it on a usb with [Ventoy](https://github.com/ventoy/Ventoy) (Recommended) or [Balena Etcher](https://github.com/balena-io/etcher). Then run the following commands when you boot into the live environment:
 ```
 pacman -Sy git
 git clone https://github.com/ghoulboii/arch-installer
@@ -19,10 +20,10 @@ reboot
 - [x] BTRFS Subvolumes
 - [x] Adding .local and other directories
 - [x] Doom Emacs Install
-- [ ] /etc Files
+- [x] /etc Files
 - [x] Flatpak packages
 - [x] Sleek Grub Theme
-- [ ] Snapper Config
+- [x] Snapper Config
 
 ## License 
 

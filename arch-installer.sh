@@ -72,7 +72,7 @@ mount -o noatime,subvol=@.snapshots $linux /mnt/.snapshots
 case $swapcreation in
   y)
     echo -e "\e[1;36mCREATING SWAP\e[0m"
-    dd if=/dev/zero of=/mnt/swap/swapfile bs=1M count=2048 status=progress
+    fallocate -l 2G /mnt/swap/swapfile
     chmod 600 /mnt/swap/swapfile # set permissions.
     chown root /mnt/swap/swapfile
     mkswap /mnt/swap/swapfile
@@ -117,7 +117,7 @@ EOF
 
 echo -e "\e[1;32mPACMAN PACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-pacman -Sy --noconfirm bridge-utils btop ccat dash dnsmasq dunst feh flatpak \
+pacman -Sy --noconfirm bridge-utils btop dash dnsmasq dunst feh flatpak \
                        gamemode gawk git grub iwd lib32-pipewire libvirt linux-zen-headers man-db \
                        mesa mesa-utils mpv ncdu neofetch neovim npm ntfs-3g \
                        openbsd-netcat openssh os-prober pcmanfm pipewire pipewire-pulse playerctl \
@@ -164,7 +164,6 @@ git clone --depth=1 --separate-git-dir=.dots https://github.com/ghoulboii/dotfil
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
 rm -rf tmpdotfiles
 /usr/bin/git --git-dir=~/.dotfiles/ --work-tree=~ config --local status.showUntrackedFiles no
-ln -sf ~/.config/shell/profile ~/.zprofile
 mkdir ~/{dl,doc,music,pics}
 xdg-user-dirs-update
 
@@ -185,9 +184,9 @@ EOF
 
 echo -e "\e[1;35mAUR PACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-sudo -i -u $username paru -S --noconfirm autojump-rs devour jdk-temurin libxft-bgra-git \
+sudo -i -u $username paru -S --noconfirm autojump-rs ccat devour jdk-temurin \
                                         lf-bin nerd-fonts-fira-code noisetorch optimus-manager  \
-                                        trash-cli ttf-ms-fonts zsh-fast-syntax-highlighting
+                                        ttf-ms-fonts zsh-fast-syntax-highlighting
 EOF
 
 case $nvidia in
@@ -216,6 +215,7 @@ mv /mnt/home/$username/etc/optimus-manager /mnt/etc/
 mv /mnt/home/$username/etc/snapper/configs/config /mnt/etc/snapper/configs/
 
 sed -i '$d' /mnt/etc/sudoers
+ln -sf ~/.config/shell/profile ~/.zprofile
 cp post-install.sh /mnt/home/$username/post-install.sh
 rm -rf /mnt/home/$username/.bash*
 for i in {5..1}
