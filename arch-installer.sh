@@ -117,17 +117,17 @@ EOF
 
 echo -e "\e[1;32mPACMAN PACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-pacman -Sy --noconfirm bridge-utils btop dash dnsmasq dunst feh flatpak \
-                       gamemode git grub iwd lib32-pipewire libvirt linux-zen-headers man-db \
+pacman -Sy --noconfirm bridge-utils btop ccat dash dnsmasq dunst feh flatpak \
+                       gamemode gawk git grub iwd lib32-pipewire libvirt linux-zen-headers man-db \
                        mesa mesa-utils mpv ncdu neofetch neovim npm ntfs-3g \
                        openbsd-netcat openssh os-prober pcmanfm pipewire pipewire-pulse playerctl \
-                       python-pywal qemu-desktop reflector rofi rsync snapper tlp vde2 \
+                       python-pywal qemu-desktop reflector rofi rsync rust snapper tlp ueberzug vde2 \
                        virt-manager virt-viewer wezterm wine-nine wine-staging \
                        winetricks wireplumber xbindkeys xclip xcompmgr \
                        xdg-desktop-portal-gtk xdg-user-dirs xdg-utils \
                        xdotool xf86-input-libinput xorg-server xorg-xinit \
                        xorg-xinput xorg-xrandr xorg-xset yt-dlp \
-                       zsh zsh-autosuggestions
+                       zsh zsh-autosuggestions zstd
 EOF
 
 echo -e "\e[1;32mGRUB\e[0m"
@@ -185,8 +185,8 @@ EOF
 
 echo -e "\e[1;35mAUR PACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-sudo -i -u $username paru -S --noconfirm autojump-rs devour jdk-temurin \
-                                        lf-bin nerd-fonts-hack noisetorch optimus-manager  \
+sudo -i -u $username paru -S --noconfirm autojump-rs devour jdk-temurin libxft-bgra-git \
+                                        lf-bin nerd-fonts-fira-code noisetorch optimus-manager  \
                                         trash-cli ttf-ms-fonts zsh-fast-syntax-highlighting
 EOF
 
