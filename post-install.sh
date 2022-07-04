@@ -2,8 +2,9 @@ flatpak install -y org.mozilla.firefox com.github.tchx84.Flatseal \
                                         com.github.wwmm.easyeffects com.google.Chrome com.valvesoftware.Steam \
                                         org.flameshot.Flameshot org.gimp.Gimp/x86_64/stable org.libreoffice.LibreOffice \
                                         com.obsproject.Studio org.polymc.PolyMC org.qbittorrent.qBittorrent sh.ppy.osu \
-                                        org.freedesktop.Platform.ffmpeg-full/x86_64/21.08
-
+                                        org.freedesktop.Platform.ffmpeg-full/x86_64/21.08 com.valvesoftware.Steam.CompatibilityTool.Proton-GE/x86_64/stable
+sudo mkdir /mnt/games
+sudo flatpak override --filesystem=/mnt/games
 # Installing Lutris from Beta repositories (May have to change when it comes to stable)
 # flatpak remote-add flathub-beta https://flathub.org/beta-repo/flathub-beta.flatpakrepo
 # flatpak update --appstream

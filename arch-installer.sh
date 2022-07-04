@@ -89,7 +89,7 @@ case $bios in
 esac
 
 echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
-pacstrap /mnt base base-devel linux-zen linux-firmware btrfs-progs intel-ucode 
+pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub
 genfstab -U /mnt >> /mnt/etc/fstab
 
 clear
@@ -115,24 +115,12 @@ arch-chroot /mnt <<EOF
 echo "root:$pass1" | chpasswd
 EOF
 
-echo -e "\e[1;32mPACMAN PACKAGES\e[0m"
-arch-chroot /mnt <<EOF
-pacman -Sy --noconfirm bridge-utils btop dash dnsmasq dunst feh flatpak \
-                       gamemode gawk git grub iwd lib32-pipewire libvirt linux-zen-headers man-db \
-                       mesa mesa-utils mpv ncdu neofetch neovim npm ntfs-3g \
-                       openbsd-netcat openssh os-prober pcmanfm pipewire pipewire-pulse playerctl \
-                       python-pywal qemu-desktop reflector rofi rsync rust snapper tlp ueberzug vde2 \
-                       virt-manager virt-viewer wezterm wine-nine wine-staging \
-                       winetricks wireplumber xbindkeys xclip xcompmgr \
-                       xdg-desktop-portal-gtk xdg-user-dirs xdg-utils \
-                       xdotool xf86-input-libinput xorg-server xorg-xinit \
-                       xorg-xinput xorg-xrandr xorg-xset yt-dlp \
-                       zsh zsh-autosuggestions zstd
-EOF
+arch-chroot /mnt pacman -Sy --noconfirm git grub libvirt reflector xdg-user-dirs xdg-utils zsh
 
 echo -e "\e[1;32mGRUB\e[0m"
 case $efi in
      /dev/*)
+       arch-chroot /mnt pacman -Sy --noconfirm efibootmgr
         arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
     ;;
      *)
@@ -142,7 +130,7 @@ case $efi in
 esac
 
 echo -e "\e[1;32mUSER CREATION\e[0m"
-arch-chroot /mnt systemctl enable systemd-networkd systemd-resolved tlp reflector.timer libvirtd
+arch-chroot /mnt systemctl enable systemd-networkd systemd-resolved reflector.timer libvirtd
 arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
 arch-chroot /mnt usermod -aG libvirt $username
 arch-chroot /mnt <<EOF
@@ -182,11 +170,18 @@ makepkg --noconfirm -rsi
 rm -rf ~/.local/src/paru
 EOF
 
-echo -e "\e[1;35mAUR PACKAGES\e[0m"
+echo -e "\e[1;35mPACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-sudo -i -u $username paru -S --noconfirm autojump-rs ccat devour jdk-temurin \
-                                        lf-bin nerd-fonts-fira-code noisetorch optimus-manager  \
-                                        ttf-ms-fonts zsh-fast-syntax-highlighting
+sudo -i -u $username paru -Sy --noconfirm autojump-rs bridge-utils btop ccat dash devour dnsmasq dunst feh flatpak jdk-temurin \
+                                          gamemode gawk iwd lf-bin lib32-pipewire man-db \
+                                          mesa mesa-utils mpv ncdu neofetch neovim nerd-fonts-fira-code npm ntfs-3g \
+                                          openbsd-netcat openssh optimus-manager os-prober pcmanfm pipewire pipewire-pulse \
+                                          playerctl python-pywal qemu-desktop reflector rofi rsync rust snapper tlp ueberzug \
+                                          vde2 virt-manager virt-viewer wezterm wine-nine wine-staging \
+                                          winetricks wireplumber xbindkeys xclip xcompmgr xdg-desktop-portal-gtk \
+                                          xdotool xf86-input-libinput xorg-server xorg-xev xorg-xinit \
+                                          xorg-xinput xorg-xrandr xorg-xset yt-dlp \
+                                          zsh-autosuggestions zsh-fast-syntax-highlighting zstd
 EOF
 
 case $nvidia in
