@@ -46,7 +46,7 @@ read -p "Enter which graphics driver you use (Enter \"1\" for Nvidia or \"2\" fo
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
 
 pacman --noconfirm -Sy archlinux-keyring reflector
-reflector -a 48 -c $(curl -4 ifconfig.co/country-iso)iso -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist
+reflector -a 48 -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist
 timedatectl set-ntp true
 
 echo -e "\e[1;36mCREATING SUBVOLUMES\e[0m"
@@ -89,7 +89,7 @@ case $bios in
 esac
 
 echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
-pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub
+pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager
 genfstab -U /mnt >> /mnt/etc/fstab
 
 clear
@@ -115,7 +115,7 @@ arch-chroot /mnt <<EOF
 echo "root:$pass1" | chpasswd
 EOF
 
-arch-chroot /mnt pacman -Sy --noconfirm git grub libvirt reflector xdg-user-dirs xdg-utils zsh
+arch-chroot /mnt pacman -Sy --noconfirm git grub libvirt reflector rsync xdg-user-dirs xdg-utils zsh
 
 echo -e "\e[1;32mGRUB\e[0m"
 case $efi in
@@ -130,7 +130,7 @@ case $efi in
 esac
 
 echo -e "\e[1;32mUSER CREATION\e[0m"
-arch-chroot /mnt systemctl enable systemd-networkd systemd-resolved reflector.timer libvirtd
+arch-chroot /mnt systemctl enable NetworkManager reflector.timer libvirtd
 arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
 arch-chroot /mnt usermod -aG libvirt $username
 arch-chroot /mnt <<EOF
@@ -172,16 +172,16 @@ EOF
 
 echo -e "\e[1;35mPACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-sudo -i -u $username paru -Sy --noconfirm autojump-rs bridge-utils btop ccat dash devour dnsmasq dunst feh flatpak jdk-temurin \
-                                          gamemode gawk iwd lf-bin lib32-pipewire man-db \
-                                          mesa mesa-utils mpv ncdu neofetch neovim nerd-fonts-fira-code npm ntfs-3g \
-                                          openbsd-netcat openssh optimus-manager os-prober pcmanfm pipewire pipewire-pulse \
-                                          playerctl python-pywal qemu-desktop reflector rofi rsync rust snapper tlp ueberzug \
-                                          vde2 virt-manager virt-viewer wezterm wine-nine wine-staging \
-                                          winetricks wireplumber xbindkeys xclip xcompmgr xdg-desktop-portal-gtk \
+sudo -i -u $username paru -Sy --noconfirm bass-fish bridge-utils btop dnsmasq dunst fd feh fish flatpak jdk8-openjdk jdk17-openjdk \
+                                          gamemode lf-bin lib32-pipewire libqalculate man-db \
+                                          mesa mesa-utils mopidy-mpd mopidy-mpris mopidy-ytmusic mpv ncdu neofetch neovim nerd-fonts-fira-code npm ntfs-3g \
+                                          openbsd-netcat openssh optimus-manager os-prober pcmanfm-gtk3 picom pipewire pipewire-pulse \
+                                          playerctl python-pywal qemu-desktop reflector ripgrep rofi rofimoji rust snapper tmux ttf-ms-fonts ueberzug \
+                                          vde2 virt-manager virt-viewer wezterm wget wine-nine wine-staging \
+                                          winetricks wireplumber xbindkeys xclip xdg-desktop-portal-gtk \
                                           xdotool xf86-input-libinput xorg-server xorg-xev xorg-xinit \
                                           xorg-xinput xorg-xrandr xorg-xset yt-dlp \
-                                          zsh-autosuggestions zsh-fast-syntax-highlighting zstd
+                                          zsh-autosuggestions zsh-completions zsh-fast-syntax-highlighting zsh-history- substring-search zoxide zstd
 EOF
 
 case $nvidia in
