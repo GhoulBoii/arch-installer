@@ -89,7 +89,7 @@ case $bios in
 esac
 
 echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
-pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager
+pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh xorg-server xorg-xinit 
 genfstab -U /mnt >> /mnt/etc/fstab
 
 clear
@@ -114,8 +114,6 @@ sed -i 's/MODULES=()/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
 arch-chroot /mnt <<EOF
 echo "root:$pass1" | chpasswd
 EOF
-
-arch-chroot /mnt pacman -Sy --noconfirm git grub libvirt reflector rsync xdg-user-dirs xdg-utils zsh
 
 echo -e "\e[1;32mGRUB\e[0m"
 case $efi in
@@ -177,11 +175,11 @@ sudo -i -u $username paru -Sy --noconfirm bass-fish bridge-utils btop dnsmasq du
                                           mesa mesa-utils mopidy-mpd mopidy-mpris mopidy-ytmusic mpv ncdu neofetch neovim nerd-fonts-fira-code npm ntfs-3g \
                                           openbsd-netcat openssh optimus-manager os-prober pcmanfm-gtk3 picom pipewire pipewire-pulse \
                                           playerctl python-pywal qemu-desktop reflector ripgrep rofi rofimoji rust snapper tmux ttf-ms-fonts ueberzug \
-                                          vde2 virt-manager virt-viewer wezterm wget wine-nine wine-staging \
+                                          vde2 virt-manager virt-viewer wezterm-git wget wine-staging \
                                           winetricks wireplumber xbindkeys xclip xdg-desktop-portal-gtk \
-                                          xdotool xf86-input-libinput xorg-server xorg-xev xorg-xinit \
+                                          xdotool xf86-input-libinput xorg-xev \
                                           xorg-xinput xorg-xrandr xorg-xset yt-dlp \
-                                          zsh-autosuggestions zsh-completions zsh-fast-syntax-highlighting zsh-history- substring-search zoxide zstd
+                                          zsh-autosuggestions zsh-completions zsh-fast-syntax-highlighting zsh-history-substring-search zoxide zstd
 EOF
 
 case $nvidia in
@@ -195,14 +193,14 @@ case $nvidia in
     ;;
 esac
 
-echo -e "\e[1;35mInstalling Sleek Grub theme...\e[0m"
-mkdir -p /mnt/usr/share/grub/themes/
-mv /mnt/home/$username/sleek/ /mnt/usr/share/grub/themes/
-cp -an /mnt/etc/default/grub /mnt/etc/default/grub.bak
-grep "GRUB_THEME=" /mnt/etc/default/grub 2>&1 >/dev/null && sed -i '/GRUB_THEME=/d' /mnt/etc/default/grub
-echo "GRUB_THEME=\"/usr/share/grub/themes/sleek/theme.txt\"" >> /mnt/etc/default/grub
-sed -i '/GRUB_DISABLE_OS_PROBER=false/s/^#//g' /mnt/etc/default/grub
-arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+# echo -e "\e[1;35mInstalling Sleek Grub theme...\e[0m"
+# mkdir -p /mnt/usr/share/grub/themes/
+# mv /mnt/home/$username/sleek/ /mnt/usr/share/grub/themes/
+# cp -an /mnt/etc/default/grub /mnt/etc/default/grub.bak
+# grep "GRUB_THEME=" /mnt/etc/default/grub 2>&1 >/dev/null && sed -i '/GRUB_THEME=/d' /mnt/etc/default/grub
+# echo "GRUB_THEME=\"/usr/share/grub/themes/sleek/theme.txt\"" >> /mnt/etc/default/grub
+# sed -i '/GRUB_DISABLE_OS_PROBER=false/s/^#//g' /mnt/etc/default/grub
+# arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 echo -e "\e[1;35m/etc Files\e[0m"
 rm -rf /mnt/etc/optimus-manager
@@ -210,7 +208,7 @@ mv /mnt/home/$username/etc/optimus-manager /mnt/etc/
 mv /mnt/home/$username/etc/snapper/configs/config /mnt/etc/snapper/configs/
 
 sed -i '$d' /mnt/etc/sudoers
-ln -sf ~/.config/shell/profile ~/.zprofile
+ln -sf /mnt/home/$username/.config/shell/profile /mnt/home/$username/.zprofile
 cp post-install.sh /mnt/home/$username/post-install.sh
 rm -rf /mnt/home/$username/.bash*
 for i in {5..1}
