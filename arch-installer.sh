@@ -8,7 +8,6 @@ read -p "Enter drive (Ex. - /dev/sda): " drive
 cfdisk $drive
 lsblk
 read -p "Enter the Linux Partition (Ex. - /dev/sda2): " linux
-read -p "Would you like swap? (Answer y for swap): " swapcreation
 if [[ -d "/sys/firmware/efi" ]]; then
   read -p "Enter EFI partition (Ex. - /dev/sda2): " efi
 fi
@@ -45,8 +44,8 @@ echo -e "\nAmd and Intel Drivers will automatically work with the mesa package. 
 read -p "Enter which graphics driver you use (Enter \"1\" for Nvidia or \"2\" for Legacy Nvidia Drivers (Driver 390): " nvidia
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
 
-pacman --noconfirm -Sy archlinux-keyring reflector
-reflector -a 48 -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist
+pacman --noconfirm -Sy archlinux-keyring
+reflector -a 48 -c $(curl -4 ifconfig.co/country-iso) -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist
 timedatectl set-ntp true
 
 echo -e "\e[1;36mCREATING SUBVOLUMES\e[0m"
@@ -57,28 +56,25 @@ btrfs subvolume create /mnt/@home
 btrfs subvolume create /mnt/@swap
 btrfs subvolume create /mnt/@var
 btrfs subvolume create /mnt/@tmp
-btrfs subvolume create /mnt/@.snapshots
 umount /mnt
 
 echo -e "\e[1;36mMOUNTING SUBVOLUMES\e[0m"
 mount -o noatime,discard=async,compress=zstd:2,subvol=@ $linux /mnt
-mkdir /mnt/{home,swap,var,tmp,.snapshots}
+mkdir /mnt/{home,swap,var,tmp}
 mount -o noatime,compress=zstd:2,subvol=@home $linux /mnt/home
 mount -o nodatacow,subvol=@swap $linux /mnt/swap
 mount -o nodatacow,subvol=@var $linux /mnt/var
 mount -o noatime,compress=zstd:2,subvol=@tmp $linux /mnt/tmp
-mount -o noatime,subvol=@.snapshots $linux /mnt/.snapshots
 
-case $swapcreation in
-  y)
-    echo -e "\e[1;36mCREATING SWAP\e[0m"
-    fallocate -l 2G /mnt/swap/swapfile
-    chmod 600 /mnt/swap/swapfile # set permissions.
-    chown root /mnt/swap/swapfile
-    mkswap /mnt/swap/swapfile
-    swapon /mnt/swap/swapfile
-    ;;
-esac
+echo -e "\e[1;36mCREATING SWAP\e[0m"
+truncate -s 0 /mnt/swap/swapfile
+chattr +C /mnt/swap/swapfile
+dd if=/dev/zero of=/mnt/swap/swapfile bs=1M count=2048
+chmod 600 /mnt/swap/swapfile
+chown root /mnt/swap/swapfile
+mkswap /mnt/swap/swapfile
+swapon /mnt/swap/swapfile
+
 case $bios in
   /dev/*)
     echo -e "\e[1;36mCREATING UEFI PARTITION\e[0m"
@@ -89,7 +85,7 @@ case $bios in
 esac
 
 echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
-pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh xorg-server xorg-xinit 
+pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh
 genfstab -U /mnt >> /mnt/etc/fstab
 
 clear
@@ -115,6 +111,7 @@ arch-chroot /mnt <<EOF
 echo "root:$pass1" | chpasswd
 EOF
 
+arch-chroot /mnt pacman -Sy --noconfirm xorg-server xorg-xinit
 echo -e "\e[1;32mGRUB\e[0m"
 case $efi in
      /dev/*)
@@ -149,33 +146,34 @@ echo -e "\e[1;35mDOTFILES\e[0m"
 git clone --depth=1 --separate-git-dir=.dots https://github.com/ghoulboii/dotfiles.git tmpdotfiles
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
 rm -rf tmpdotfiles
-/usr/bin/git --git-dir=~/.dotfiles/ --work-tree=~ config --local status.showUntrackedFiles no
+/usr/bin/git --git-dir=.dots/ --work-tree=~ config --local status.showUntrackedFiles no
 mkdir ~/{dl,doc,music,pics}
 xdg-user-dirs-update
-
-echo -e "\e[1;35mDWM\e[0m"
-git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
-sudo make -sC ~/.local/src/dwm install
-
-echo -e "\e[1;35mDWMBLOCKS\e[0m"
-git clone --depth=1 https://github.com/ghoulboii/dwmblocks ~/.local/src/dwmblocks
-sudo make -sC ~/.local/src/dwmblocks install
 
 echo -e "\e[1;35mPARU\e[0m"
 git clone --depth=1 https://aur.archlinux.org/paru-bin.git ~/.local/src/paru
 cd ~/.local/src/paru
 makepkg --noconfirm -rsi
 rm -rf ~/.local/src/paru
+
+echo -e "\e[1;35mDWM\e[0m"
+paru -Sy --noconfirm libxft-bgra
+git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
+sudo make -sC ~/.local/src/dwm install
+
+echo -e "\e[1;35mDWMBLOCKS\e[0m"
+git clone --depth=1 https://github.com/ghoulboii/dwmblocks.git ~/.local/src/dwmblocks
+sudo make -sC ~/.local/src/dwmblocks install
 EOF
 
 echo -e "\e[1;35mPACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-sudo -i -u $username paru -Sy --noconfirm bass-fish bridge-utils btop dnsmasq dunst fd feh fish flatpak jdk8-openjdk jdk17-openjdk \
-                                          gamemode lf-bin lib32-pipewire libqalculate man-db \
-                                          mesa mesa-utils mopidy-mpd mopidy-mpris mopidy-ytmusic mpv ncdu neofetch neovim nerd-fonts-fira-code npm ntfs-3g \
-                                          openbsd-netcat openssh optimus-manager os-prober pcmanfm-gtk3 picom pipewire pipewire-pulse \
-                                          playerctl python-pywal qemu-desktop reflector ripgrep rofi rofimoji rust snapper tmux ttf-ms-fonts ueberzug \
-                                          vde2 virt-manager virt-viewer wezterm-git wget wine-staging \
+sudo -i -u $username paru -Sy --noconfirm bridge-utils btop dnsmasq dunst fd feh jdk8-openjdk jdk17-openjdk \
+                                          gamemode kitty lf-bin lib32-pipewire libreoffice-fresh libqalculate man-db \
+                                          mesa mesa-utils mopidy-mpd mopidy-mpris mopidy-ytmusic mpv ncdu neofetch neovim nerd-fonts-fira-code npm \
+                                          obs-studio openbsd-netcat openssh optimus-manager os-prober picom pipewire pipewire-pulse \
+                                          playerctl polymc-bin python-pywal qbittorrent qemu-desktop reflector ripgrep rofi rofimoji rust steam tmux ttf-ms-fonts ueberzug \
+                                          vde2 virt-manager virt-viewer wget wine-staging \
                                           winetricks wireplumber xbindkeys xclip xdg-desktop-portal-gtk \
                                           xdotool xf86-input-libinput xorg-xev \
                                           xorg-xinput xorg-xrandr xorg-xset yt-dlp \
@@ -205,11 +203,9 @@ esac
 echo -e "\e[1;35m/etc Files\e[0m"
 rm -rf /mnt/etc/optimus-manager
 mv /mnt/home/$username/etc/optimus-manager /mnt/etc/
-mv /mnt/home/$username/etc/snapper/configs/config /mnt/etc/snapper/configs/
 
 sed -i '$d' /mnt/etc/sudoers
 ln -sf /mnt/home/$username/.config/shell/profile /mnt/home/$username/.zprofile
-cp post-install.sh /mnt/home/$username/post-install.sh
 rm -rf /mnt/home/$username/.bash*
 for i in {5..1}
 do
