@@ -2,6 +2,11 @@
 
 Automated Arch Linux Installer for Different Scenarios and Scemes.
 
+## Features
+
+- Setup a working environment in less than 30 minutes
+- Uses dwm (window manager), st (terminal emulator) and rofi (application switcher)
+
 ## Usage
 
 Get the latest archlinux [ISO](https://archlinux.org/download/) and flash it on a usb with [Ventoy](https://github.com/ventoy/Ventoy) (Recommended) or [Balena Etcher](https://github.com/balena-io/etcher). Then run the following commands when you boot into the live environment:
@@ -10,20 +15,7 @@ pacman -Sy git
 git clone https://github.com/ghoulboii/arch-installer
 cd arch-installer
 ./arch-installer.sh
-reboot
-./post-installer.sh
 ```
-
-## TODO
-
-- [x] Adding all user input to the start
-- [x] BTRFS Subvolumes
-- [x] Adding .local and other directories
-- [x] Doom Emacs Install
-- [x] /etc Files
-- [x] Flatpak packages
-- [x] Sleek Grub Theme
-- [x] Snapper Config
 
 ## License 
 
