@@ -157,7 +157,7 @@ makepkg --noconfirm -rsi
 rm -rf ~/.local/src/paru
 
 echo -e "\e[1;35mDWM\e[0m"
-paru -Sy --noconfirm libxft-bgra
+paru -S --noconfirm libxft
 git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
 sudo make -sC ~/.local/src/dwm install
 
