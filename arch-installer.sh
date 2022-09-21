@@ -158,7 +158,7 @@ rm -rf ~/.local/src/paru
 
 echo -e "\e[1;35mDWM\e[0m"
 paru -S --noconfirm libxft
-git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
+git clone https://github.com/ghoulboii/dwm ~/.local/src/dwm
 sudo make -sC ~/.local/src/dwm install
 
 echo -e "\e[1;35mDWMBLOCKS\e[0m"
@@ -168,16 +168,16 @@ EOF
 
 echo -e "\e[1;35mPACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-sudo -i -u $username paru -Sy --noconfirm bridge-utils btop dnsmasq dunst fd feh jdk8-openjdk jdk17-openjdk \
-                                          gamemode kitty lf-bin lib32-pipewire libreoffice-fresh libqalculate man-db \
-                                          mesa mesa-utils mopidy-mpd mopidy-mpris mopidy-ytmusic mpv ncdu neofetch neovim nerd-fonts-fira-code npm \
-                                          obs-studio openbsd-netcat openssh optimus-manager os-prober picom pipewire pipewire-pulse \
-                                          playerctl polymc-bin python-pywal qbittorrent qemu-desktop reflector ripgrep rofi rofimoji rust steam tmux ttf-ms-fonts ueberzug \
-                                          vde2 virt-manager virt-viewer wget wine-staging \
+sudo -i -u $username paru -Sy --noconfirm bridge-utils btop dnsmasq dunst fd feh firefox flameshot fzf jdk8-openjdk jdk17-openjdk \
+                                          gamemode kitty lf-bin legendary lib32-pipewire libreoffice-fresh libqalculate man-db \
+                                          mesa mesa-utils mopidy-mpd mopidy-mpris mopidy-ytmusic mpv ncdu neofetch neovim nerd-fonts-fira-code \
+                                          noto-fonts-emoji obs-studio openbsd-netcat openssh optimus-manager os-prober pcmanfm-gtk3 picom pipewire pipewire-pulse \
+                                          playerctl polymc-bin python-pywal qbittorrent qemu-desktop reflector ripgrep rofi rofimoji steam tmux trash-cli ttf-ms-fonts ueberzug \
+                                          vde2 virt-manager virt-viewer wget wezterm wine-staging \
                                           winetricks wireplumber xbindkeys xclip xdg-desktop-portal-gtk \
                                           xdotool xf86-input-libinput xorg-xev \
                                           xorg-xinput xorg-xrandr xorg-xset yt-dlp \
-                                          zsh-autosuggestions zsh-completions zsh-fast-syntax-highlighting zsh-history-substring-search zoxide zstd
+                                          zathura zathura-pdf-mupdf zoxide zsh-autosuggestions zsh-completions zsh-fast-syntax-highlighting zsh-history-substring-search zstd
 EOF
 
 case $nvidia in
@@ -191,21 +191,12 @@ case $nvidia in
     ;;
 esac
 
-# echo -e "\e[1;35mInstalling Sleek Grub theme...\e[0m"
-# mkdir -p /mnt/usr/share/grub/themes/
-# mv /mnt/home/$username/sleek/ /mnt/usr/share/grub/themes/
-# cp -an /mnt/etc/default/grub /mnt/etc/default/grub.bak
-# grep "GRUB_THEME=" /mnt/etc/default/grub 2>&1 >/dev/null && sed -i '/GRUB_THEME=/d' /mnt/etc/default/grub
-# echo "GRUB_THEME=\"/usr/share/grub/themes/sleek/theme.txt\"" >> /mnt/etc/default/grub
-# sed -i '/GRUB_DISABLE_OS_PROBER=false/s/^#//g' /mnt/etc/default/grub
-# arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
-
 echo -e "\e[1;35m/etc Files\e[0m"
 rm -rf /mnt/etc/optimus-manager
 mv /mnt/home/$username/etc/optimus-manager /mnt/etc/
 
 sed -i '$d' /mnt/etc/sudoers
-ln -sf /mnt/home/$username/.config/shell/profile /mnt/home/$username/.zprofile
+arch-chroot /mnt sudo -i -u $username ln -sf /home/$username/.config/shell/profile /home/$username/.zprofile
 rm -rf /mnt/home/$username/.bash*
 for i in {5..1}
 do
