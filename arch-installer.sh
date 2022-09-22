@@ -45,7 +45,7 @@ read -p "Enter which graphics driver you use (Enter \"1\" for Nvidia or \"2\" fo
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
 
 pacman --noconfirm -Sy archlinux-keyring
-reflector -a 48 -c $(curl -4 ifconfig.co/country-iso) -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist
+reflector -a 48 -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist
 timedatectl set-ntp true
 
 echo -e "\e[1;36mCREATING SUBVOLUMES\e[0m"
@@ -147,7 +147,7 @@ git clone --depth=1 --separate-git-dir=.dots https://github.com/ghoulboii/dotfil
 rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
 rm -rf tmpdotfiles
 /usr/bin/git --git-dir=.dots/ --work-tree=~ config --local status.showUntrackedFiles no
-mkdir ~/{dl,doc,music,pics}
+mkdir ~/{dl,doc,pics}
 xdg-user-dirs-update
 
 echo -e "\e[1;35mPARU\e[0m"
@@ -157,8 +157,9 @@ makepkg --noconfirm -rsi
 rm -rf ~/.local/src/paru
 
 echo -e "\e[1;35mDWM\e[0m"
-paru -S --noconfirm libxft
-git clone https://github.com/ghoulboii/dwm ~/.local/src/dwm
+cd
+paru -S --noconfirm libxft libxinerama
+git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
 sudo make -sC ~/.local/src/dwm install
 
 echo -e "\e[1;35mDWMBLOCKS\e[0m"
@@ -169,7 +170,7 @@ EOF
 echo -e "\e[1;35mPACKAGES\e[0m"
 arch-chroot /mnt <<EOF
 sudo -i -u $username paru -Sy --noconfirm bridge-utils btop dnsmasq dunst fd feh firefox flameshot fzf jdk8-openjdk jdk17-openjdk \
-                                          gamemode kitty lf-bin legendary lib32-pipewire libreoffice-fresh libqalculate man-db \
+                                          gamemode lf-bin legendary lib32-pipewire libreoffice-fresh libqalculate man-db \
                                           mesa mesa-utils mopidy-mpd mopidy-mpris mopidy-ytmusic mpv ncdu neofetch neovim nerd-fonts-fira-code \
                                           noto-fonts-emoji obs-studio openbsd-netcat openssh optimus-manager os-prober pcmanfm-gtk3 picom pipewire pipewire-pulse \
                                           playerctl polymc-bin python-pywal qbittorrent qemu-desktop reflector ripgrep rofi rofimoji steam tmux trash-cli ttf-ms-fonts ueberzug \
