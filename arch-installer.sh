@@ -110,8 +110,8 @@ sed -i 's/MODULES=()/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
 arch-chroot /mnt <<EOF
 echo "root:$pass1" | chpasswd
 EOF
-
 arch-chroot /mnt pacman -Sy --noconfirm xorg-server xorg-xinit
+
 echo -e "\e[1;32mGRUB\e[0m"
 case $efi in
      /dev/*)
@@ -120,9 +120,9 @@ case $efi in
     ;;
      *)
         arch-chroot /mnt grub-install --target=i386-pc $drive
-        arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
     ;;
 esac
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 echo -e "\e[1;32mUSER CREATION\e[0m"
 arch-chroot /mnt systemctl enable NetworkManager reflector.timer libvirtd
