@@ -169,11 +169,11 @@ EOF
 
 echo -e "\e[1;35mPACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-sudo -i -u $username paru -Sy --noconfirm bridge-utils btop dnsmasq dunst fd feh firefox flameshot fzf jdk8-openjdk jdk17-openjdk \
-                                          gamemode lf-bin legendary lib32-pipewire libreoffice-fresh libqalculate man-db \
-                                          mesa mesa-utils mopidy-mpd mopidy-mpris mopidy-ytmusic mpv ncdu neofetch neovim nerd-fonts-fira-code \
-                                          noto-fonts-emoji obs-studio openbsd-netcat openssh optimus-manager os-prober pcmanfm-gtk3 picom pipewire pipewire-pulse \
-                                          playerctl polymc-bin python-pywal qbittorrent qemu-desktop reflector ripgrep rofi rofimoji steam tmux trash-cli ttf-ms-fonts ueberzug \
+sudo -i -u $username paru -Sy --noconfirm bat bridge-utils btop dnsmasq dunst easyeffects fd feh firefox flameshot fzf jdk8-openjdk jdk17-openjdk \
+                                          gamemode gimp lf-bin legendary lib32-gamemode lib32-pipewire libreoffice-fresh libqalculate man-db \
+                                          mesa mesa-utils mopidy mopidy-mpd mopidy-mpris mopidy-ytmusic mpv ncdu ncmpcpp neofetch neovim nerd-fonts-fira-code \
+                                          noto-fonts noto-fonts-emoji obs-studio openbsd-netcat openssh optimus-manager os-prober pavucontrol pcmanfm-gtk3 picom pipewire pipewire-pulse \
+                                          playerctl polymc-bin python-pywal qbittorrent qemu-desktop reflector ripgrep rofi rofimoji steam tldr tmux trash-cli ttf-ms-fonts ueberzug \
                                           vde2 virt-manager virt-viewer wget wezterm wine-staging \
                                           winetricks wireplumber xbindkeys xclip xdg-desktop-portal-gtk \
                                           xdotool xf86-input-libinput xorg-xev \
