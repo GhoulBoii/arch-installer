@@ -5,7 +5,7 @@ Automated Arch Linux Installer for Different Scenarios and Scemes.
 ## Features
 
 - Setup a working environment in less than 30 minutes
-- Uses dwm (window manager), wezterm (terminal emulator) and rofi (application switcher)
+- Uses dwm (window manager), st (terminal emulator) and dmenu (application switcher)
 
 ## Usage
 
