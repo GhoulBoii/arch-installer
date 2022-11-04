@@ -97,7 +97,7 @@ grep -q "ILoveCandy" /mnt/etc/pacman.conf || sed -i "/#VerbosePkgLists/a ILoveCa
 sed -i "/^#ParallelDownloads/s/=.*/= 5/;s/^#Color$/Color/" /mnt/etc/pacman.conf
 sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
 
-ln -sf /mnt/usr/share/zoneinfo/Asia/Kolkata /mnt/etc/localtime
+arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
 arch-chroot /mnt hwclock --systohc
 echo "en_US.UTF-8 UTF-8" >> /mnt/etc/locale.gen
 arch-chroot /mnt locale-gen
@@ -115,11 +115,11 @@ arch-chroot /mnt pacman -Sy --noconfirm xorg-server xorg-xinit
 echo -e "\e[1;32mGRUB\e[0m"
 case $efi in
      /dev/*)
-       arch-chroot /mnt pacman -Sy --noconfirm efibootmgr
-        arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+      arch-chroot /mnt pacman -Sy --noconfirm efibootmgr
+      arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
     ;;
      *)
-        arch-chroot /mnt grub-install --target=i386-pc $drive
+      arch-chroot /mnt grub-install --target=i386-pc $drive
     ;;
 esac
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
@@ -165,20 +165,33 @@ sudo make -sC ~/.local/src/dwm install
 echo -e "\e[1;35mDWMBLOCKS\e[0m"
 git clone --depth=1 https://github.com/ghoulboii/dwmblocks.git ~/.local/src/dwmblocks
 sudo make -sC ~/.local/src/dwmblocks install
+
+echo -e "\e[1;35mST\e[0m"
+git clone --depth=1 https://github.com/ghoulboii/st.git ~/.local/src/st
+sudo make -sC ~/.local/src/st install
+
+echo -e "\e[1;35mDMENU\e[0m"
+git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
+sudo make -sC ~/.local/src/dmenu install
 EOF
 
 echo -e "\e[1;35mPACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-sudo -i -u $username paru -Sy --noconfirm bat bridge-utils btop dnsmasq dunst easyeffects fd feh firefox flameshot fzf jdk8-openjdk jdk17-openjdk \
-                                          gamemode gimp lf-bin legendary lib32-gamemode lib32-pipewire libreoffice-fresh libqalculate man-db \
-                                          mesa mesa-utils mopidy mopidy-mpd mopidy-mpris mopidy-ytmusic mpv ncdu ncmpcpp neofetch neovim nerd-fonts-fira-code \
-                                          noto-fonts noto-fonts-emoji obs-studio openbsd-netcat openssh optimus-manager os-prober pavucontrol pcmanfm-gtk3 picom pipewire pipewire-pulse \
-                                          playerctl polymc-bin python-pywal qbittorrent qemu-desktop reflector ripgrep rofi rofimoji steam tldr tmux trash-cli ttf-ms-fonts ueberzug \
-                                          vde2 virt-manager virt-viewer wget wezterm wine-staging \
-                                          winetricks wireplumber xbindkeys xclip xdg-desktop-portal-gtk \
-                                          xdotool xf86-input-libinput xorg-xev \
-                                          xorg-xinput xorg-xrandr xorg-xset yt-dlp \
-                                          zathura zathura-pdf-mupdf zoxide zsh-autosuggestions zsh-completions zsh-fast-syntax-highlighting zsh-history-substring-search zstd
+sudo -i -u $username paru -Sy --noconfirm bat btop devour dunst easyeffects envycontrol fd feh firefox flameshot \
+                                          fzf jdk8-openjdk jdk17-openjdk gamemode gimp lf-bin legendary \
+                                          lib32-gamemode lib32-pipewire libreoffice-fresh libqalculate \
+                                          man-db mesa mesa-utils mopidy mopidy-mpd mopidy-mpris \
+                                          mopidy-ytmusic mpv mpv-mpris ncdu ncmpcpp neofetch neovim \
+                                          nerd-fonts-fira-code newsboat noto-fonts noto-fonts-emoji obs-studio \
+                                          openssh os-prober pavucontrol pcmanfm-gtk3 pipewire \
+                                          pipewire-pulse playerctl prismlauncher-bin python-pywal \
+                                          qbittorrent reflector ripgrep steam tldr tmux trash-cli \
+                                          ttf-ms-fonts ueberzug wget wine-staging winetricks wireplumber \
+                                          xbindkeys xclip xdg-desktop-portal-gtk xdotool \
+                                          xf86-input-libinput xorg-xev xorg-xinput xorg-xrandr xorg-xset \
+                                          xsel yt-dlp zathura zathura-pdf-mupdf zoxide \
+                                          zsh-autosuggestions zsh-completions \
+                                          zsh-fast-syntax-highlighting zsh-history-substring-search zstd 
 EOF
 
 case $nvidia in
@@ -191,10 +204,6 @@ case $nvidia in
     arch-chroot /mnt sudo -i -u $username paru -S --noconfirm nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
     ;;
 esac
-
-echo -e "\e[1;35m/etc Files\e[0m"
-rm -rf /mnt/etc/optimus-manager
-mv /mnt/home/$username/etc/optimus-manager /mnt/etc/
 
 sed -i '$d' /mnt/etc/sudoers
 arch-chroot /mnt sudo -i -u $username ln -sf /home/$username/.config/shell/profile /home/$username/.zprofile
