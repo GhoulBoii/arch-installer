@@ -45,7 +45,7 @@ read -p "Enter which graphics driver you use (Enter \"1\" for Nvidia or \"2\" fo
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
 
 pacman --noconfirm -Sy archlinux-keyring
-reflector -a 48 -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist
+reflector -c $(curl https://ifconfig.co/country-iso) --sort rate -a 24 -f 5 -p https --save /etc/pacman.d/mirrorlist
 timedatectl set-ntp true
 
 echo -e "\e[1;36mCREATING SUBVOLUMES\e[0m"
@@ -177,19 +177,19 @@ EOF
 
 echo -e "\e[1;35mPACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-sudo -i -u $username paru -Sy --noconfirm bat btop devour dunst easyeffects envycontrol fd feh firefox flameshot \
+sudo -i -u $username paru -Sy --noconfirm bat brave-bin btop devour dunst easyeffects envycontrol fd feh flameshot \
                                           fzf jdk8-openjdk jdk17-openjdk gamemode gimp lf-bin legendary \
-                                          lib32-gamemode lib32-pipewire libreoffice-fresh libqalculate \
-                                          man-db mesa mesa-utils mopidy mopidy-mpd mopidy-mpris \
-                                          mopidy-ytmusic mpv mpv-mpris ncdu ncmpcpp neofetch neovim \
+                                          lib32-gamemode lib32-pipewire libreoffice-fresh \
+                                          man-db mesa mesa-utils \
+                                          mpv mpv-mpris ncdu ncmpcpp neofetch neovim \
                                           nerd-fonts-fira-code newsboat noto-fonts noto-fonts-emoji obs-studio \
                                           openssh os-prober pavucontrol pcmanfm-gtk3 pipewire \
                                           pipewire-pulse playerctl prismlauncher-bin python-pywal \
-                                          qbittorrent reflector ripgrep steam tldr tmux trash-cli \
+                                          qbittorrent reflector ripgrep socat steam tldr tmux trash-cli \
                                           ttf-ms-fonts ueberzug wget wine-staging winetricks wireplumber \
                                           xbindkeys xclip xdg-desktop-portal-gtk xdotool \
                                           xf86-input-libinput xorg-xev xorg-xinput xorg-xrandr xorg-xset \
-                                          xsel yt-dlp zathura zathura-pdf-mupdf zoxide \
+                                          xsel yt-dlp ytfzf zathura zathura-pdf-mupdf zoxide \
                                           zsh-autosuggestions zsh-completions \
                                           zsh-fast-syntax-highlighting zsh-history-substring-search zstd 
 EOF
