@@ -1,4 +1,5 @@
 #!/usr/bin/env bash 
+
 clear
 echo -e "\e[1;32mGhoulBoi's Arch Installer\e[0m"
 echo -e "\e[1;32mPart 1: Partition Setup\e[0m"
@@ -42,8 +43,8 @@ done
 
 echo -e "\nAmd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users."
 read -p "Enter which graphics driver you use (Enter \"1\" for Nvidia or \"2\" for Legacy Nvidia Drivers (Driver 390): " nvidia
-sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
 
+sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
 pacman --noconfirm -Sy archlinux-keyring
 reflector -c $(curl https://ifconfig.co/country-iso) --sort rate -a 24 -f 5 -p https --save /etc/pacman.d/mirrorlist
 timedatectl set-ntp true
@@ -208,6 +209,7 @@ esac
 sed -i '$d' /mnt/etc/sudoers
 arch-chroot /mnt sudo -i -u $username ln -sf /home/$username/.config/shell/profile /home/$username/.zprofile
 rm -rf /mnt/home/$username/.bash*
+
 for i in {5..1}
 do
   echo -e "\e[1;35mREBOOTING IN $i SECONDS...\e[0m"
