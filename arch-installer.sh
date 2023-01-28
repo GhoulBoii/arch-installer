@@ -174,25 +174,28 @@ sudo make -sC ~/.local/src/st install
 echo -e "\e[1;35mDMENU\e[0m"
 git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
 sudo make -sC ~/.local/src/dmenu install
+
+echo -e "\e[1;35mNEOVIM\e[0m"
+git clone --depth=1 https://github.com/ghoulboii/nvim.git ~/.config/nvim
 EOF
 
 echo -e "\e[1;35mPACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-sudo -i -u $username paru -Sy --noconfirm bat brave-bin btop devour dunst easyeffects envycontrol fd feh flameshot \
-                                          fzf jdk8-openjdk jdk17-openjdk gamemode gimp lf-bin legendary \
-                                          lib32-gamemode lib32-pipewire libreoffice-fresh \
-                                          man-db mesa mesa-utils \
-                                          mpv mpv-mpris ncdu ncmpcpp neofetch neovim \
-                                          nerd-fonts-fira-code newsboat noto-fonts noto-fonts-emoji obs-studio \
+sudo -i -u $username paru -Sy --noconfirm bat brave-bin btop deno dunst easyeffects envycontrol fd feh \
+                                          fzf jdk8-openjdk jdk17-openjdk gamemode gimp gparted lf-bin \
+                                          lib32-gamemode lib32-pipewire libqalculate libreoffice-fresh \
+                                          man-db mesa \
+                                          mpv mpv-mpris ncdu neofetch neovim ttf-firacode-nerd \
+                                          newsboat noto-fonts noto-fonts-emoji npm obs-studio \
                                           openssh os-prober pavucontrol pcmanfm-gtk3 pipewire \
                                           pipewire-pulse playerctl prismlauncher-bin python-pywal \
-                                          qbittorrent reflector ripgrep socat steam tldr tmux trash-cli \
+                                          qbittorrent qt6ct reflector ripgrep socat tldr tmux trash-cli \
                                           ttf-ms-fonts ueberzug wget wine-staging winetricks wireplumber \
                                           xbindkeys xclip xdg-desktop-portal-gtk xdotool \
                                           xf86-input-libinput xorg-xev xorg-xinput xorg-xrandr xorg-xset \
                                           xsel yt-dlp ytfzf zathura zathura-pdf-mupdf zoxide \
                                           zsh-autosuggestions zsh-completions \
-                                          zsh-fast-syntax-highlighting zsh-history-substring-search zstd 
+                                          zsh-fast-syntax-highlighting zsh-history-substring-search zstd
 EOF
 
 case $nvidia in
