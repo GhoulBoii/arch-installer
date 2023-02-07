@@ -86,7 +86,7 @@ case $bios in
 esac
 
 echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
-pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh
+pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh pacman-contrib bluez bluez-utils blueman
 genfstab -U /mnt >> /mnt/etc/fstab
 
 clear
@@ -126,7 +126,7 @@ esac
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 echo -e "\e[1;32mUSER CREATION\e[0m"
-arch-chroot /mnt systemctl enable NetworkManager reflector.timer libvirtd
+arch-chroot /mnt systemctl enable NetworkManager libvirtd paccache.timer bluetooth
 arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
 arch-chroot /mnt usermod -aG libvirt $username
 arch-chroot /mnt <<EOF
@@ -193,7 +193,7 @@ sudo -i -u $username paru -Sy --noconfirm bat brave-bin btop deno dunst easyeffe
                                           ttf-ms-fonts ueberzug wget wine-staging winetricks wireplumber \
                                           xbindkeys xclip xdg-desktop-portal-gtk xdotool \
                                           xf86-input-libinput xorg-xev xorg-xinput xorg-xrandr xorg-xset \
-                                          xsel yt-dlp ytfzf zathura zathura-pdf-mupdf zoxide \
+                                          xsel yt-dlp zathura zathura-pdf-mupdf zoxide \
                                           zsh-autosuggestions zsh-completions \
                                           zsh-fast-syntax-highlighting zsh-history-substring-search zstd
 EOF
