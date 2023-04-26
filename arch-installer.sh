@@ -181,7 +181,7 @@ EOF
 
 echo -e "\e[1;35mPACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-sudo -i -u $username paru -Sy --noconfirm bat brave-bin btop deno dunst easyeffects envycontrol fd feh \
+sudo -i -u $username paru -Sy --noconfirm bat brave-bin btop deno easyeffects exa fd feh \
                                           fzf jdk8-openjdk jdk17-openjdk gamemode gimp gparted lf-bin \
                                           lib32-gamemode lib32-pipewire libqalculate libreoffice-fresh \
                                           man-db mesa \
