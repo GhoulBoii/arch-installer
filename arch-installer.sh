@@ -4,42 +4,51 @@ clear
 echo -e "\e[1;32mGhoulBoi's Arch Installer\e[0m"
 echo -e "\e[1;32mPart 1: Partition Setup\e[0m"
 
-lsblk
-read -p "Enter drive (Ex. - /dev/sda): " drive
-cfdisk $drive
-lsblk
-read -p "Enter the Linux Partition (Ex. - /dev/sda2): " linux
-if [[ -d "/sys/firmware/efi" ]]; then
-  read -p "Enter EFI partition (Ex. - /dev/sda2): " efi
-fi
-while true :; do 
-  read -p "Enter the hostname: " hostname
-  if [[ "${hostname}" =~ ^[a-z][a-z0-9_.-]{0,62}[a-z0-9]$ ]]
-  then
-    break
-  fi 
-  echo -e "\e[1;31mIncorrect Hostname!\e[0m"
-done
-
-while true :; do
-  read -p "Enter username: " username
-  if [[ "${username}" =~ ^[a-z_]([a-z0-9_-]{0,31}|[a-z0-9_-]{0,30}\$)$ ]]
-  then
-    break
-  fi 
-  echo -e "\e[1;31mIncorrect Username!\e[0m"
-done
-
-while true :; do 
-  read -sp "Enter password: " pass1
-  echo ""
-  read -sp "Re-enter password: " pass2
-  if [[ "${pass1}" = "${pass2}" ]]
-  then
-    break
+input_part(){
+  lsblk
+  read -p "Enter drive (Ex. - /dev/sda): " drive
+  cfdisk $drive
+  lsblk
+  read -p "Enter the Linux Partition (Ex. - /dev/sda2): " linux
+  if [[ -d "/sys/firmware/efi" ]]; then
+    read -p "Enter EFI partition (Ex. - /dev/sda2): " efi
   fi
-    echo -e "\n\e[1;31mPasswords don't match.\e[0m"
-done
+}
+
+input_host(){
+  while true :; do 
+    read -p "Enter the hostname: " hostname
+    if [[ "${hostname}" =~ ^[a-z][a-z0-9_.-]{0,62}[a-z0-9]$ ]]
+    then
+      break
+    fi 
+    echo -e "\e[1;31mIncorrect Hostname!\e[0m"
+  done
+}
+
+input_user(){
+  while true :; do
+    read -p "Enter username: " username
+    if [[ "${username}" =~ ^[a-z_]([a-z0-9_-]{0,31}|[a-z0-9_-]{0,30}\$)$ ]]
+    then
+      break
+    fi 
+    echo -e "\e[1;31mIncorrect Username!\e[0m"
+  done
+}
+
+input_pass(){
+  while true :; do 
+    read -sp "Enter password: " pass1
+    echo ""
+    read -sp "Re-enter password: " pass2
+    if [[ "${pass1}" = "${pass2}" ]]
+    then
+      break
+    fi
+      echo -e "\n\e[1;31mPasswords don't match.\e[0m"
+  done
+}
 
 echo -e "\nAmd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users."
 read -p "Enter which graphics driver you use (Enter \"1\" for Nvidia or \"2\" for Legacy Nvidia Drivers (Driver 390): " nvidia
@@ -59,22 +68,26 @@ btrfs subvolume create /mnt/@var
 btrfs subvolume create /mnt/@tmp
 umount /mnt
 
-echo -e "\e[1;36mMOUNTING SUBVOLUMES\e[0m"
-mount -o noatime,discard=async,compress=zstd:2,subvol=@ $linux /mnt
-mkdir /mnt/{home,swap,var,tmp}
-mount -o noatime,compress=zstd:2,subvol=@home $linux /mnt/home
-mount -o nodatacow,subvol=@swap $linux /mnt/swap
-mount -o nodatacow,subvol=@var $linux /mnt/var
-mount -o noatime,compress=zstd:2,subvol=@tmp $linux /mnt/tmp
+mount_subvol(){
+  echo -e "\e[1;36mMOUNTING SUBVOLUMES\e[0m"
+  mount -o noatime,discard=async,compress=zstd:2,subvol=@ $linux /mnt
+  mkdir /mnt/{home,swap,var,tmp}
+  mount -o noatime,compress=zstd:2,subvol=@home $linux /mnt/home
+  mount -o nodatacow,subvol=@swap $linux /mnt/swap
+  mount -o nodatacow,subvol=@var $linux /mnt/var
+  mount -o noatime,compress=zstd:2,subvol=@tmp $linux /mnt/tmp
+}
 
-echo -e "\e[1;36mCREATING SWAP\e[0m"
-truncate -s 0 /mnt/swap/swapfile
-chattr +C /mnt/swap/swapfile
-dd if=/dev/zero of=/mnt/swap/swapfile bs=1M count=2048
-chmod 600 /mnt/swap/swapfile
-chown root /mnt/swap/swapfile
-mkswap /mnt/swap/swapfile
-swapon /mnt/swap/swapfile
+create_swap(){
+  echo -e "\e[1;36mCREATING SWAP\e[0m"
+  truncate -s 0 /mnt/swap/swapfile
+  chattr +C /mnt/swap/swapfile
+  dd if=/dev/zero of=/mnt/swap/swapfile bs=1M count=2048
+  chmod 600 /mnt/swap/swapfile
+  chown root /mnt/swap/swapfile
+  mkswap /mnt/swap/swapfile
+  swapon /mnt/swap/swapfile
+}
 
 case $bios in
   /dev/*)
