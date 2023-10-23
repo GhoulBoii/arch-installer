@@ -4,15 +4,22 @@ clear
 echo -e "\e[1;32mGhoulBoi's Arch Installer\e[0m"
 echo -e "\e[1;32mPart 1: Partition Setup\e[0m"
 
-input_part(){
+input_drive(){
   lsblk
   read -p "Enter drive (Ex. - /dev/sda): " drive
   cfdisk $drive
+  return $drive
+}
+
+input_linux_part(){
   lsblk
   read -p "Enter the Linux Partition (Ex. - /dev/sda2): " linux
-  if [[ -d "/sys/firmware/efi" ]]; then
-    read -p "Enter EFI partition (Ex. - /dev/sda2): " efi
-  fi
+  return $linux
+}
+
+input_efi_part(){
+  read -p "Enter EFI partition (Ex. - /dev/sda2): " efi
+  return $efi
 }
 
 input_host(){
@@ -24,6 +31,7 @@ input_host(){
     fi 
     echo -e "\e[1;31mIncorrect Hostname!\e[0m"
   done
+  return $hostname
 }
 
 input_user(){
@@ -35,6 +43,7 @@ input_user(){
     fi 
     echo -e "\e[1;31mIncorrect Username!\e[0m"
   done
+  return $username
 }
 
 input_pass(){
@@ -48,10 +57,14 @@ input_pass(){
     fi
       echo -e "\n\e[1;31mPasswords don't match.\e[0m"
   done
+  return $pass1
 }
 
-echo -e "\nAmd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users."
-read -p "Enter which graphics driver you use (Enter \"1\" for Nvidia or \"2\" for Legacy Nvidia Drivers (Driver 390): " nvidia
+input_nvidia(){
+  echo -e "\nAmd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users."
+  read -p "Enter which graphics driver you use (Enter \"1\" for Nvidia or \"2\" for Legacy Nvidia Drivers (Driver 390): " nvidia
+  return $nvidia
+}
 
 sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
 pacman --noconfirm -Sy archlinux-keyring
@@ -225,6 +238,16 @@ esac
 sed -i '$d' /mnt/etc/sudoers
 arch-chroot /mnt sudo -i -u $username ln -sf /home/$username/.config/shell/profile /home/$username/.zprofile
 rm -rf /mnt/home/$username/.bash*
+
+drive = input_drive
+linux = input_linux_part
+if [[ -d "/sys/firmware/efi" ]]; then
+  efi = input_efi_part
+fi
+hostname = input_host
+username = input_user
+pass = input_pass
+nvidia = input_nvidia
 
 for i in {5..1}
 do
