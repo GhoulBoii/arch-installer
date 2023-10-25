@@ -96,12 +96,12 @@ create_swap() {
 	swapon /mnt/swap/swapfile
 }
 
-case $bios in
+case $efi in
 /dev/*)
 	echo -e "\e[1;36mCREATING UEFI PARTITION\e[0m"
-	mkfs.fat -F 32 $bios
+	mkfs.fat -F 32 $efi
 	mdkir /mnt/boot
-	mount $bios /mnt/boot
+	mount $efi /mnt/boot
 	;;
 esac
 
