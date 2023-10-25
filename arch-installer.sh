@@ -96,27 +96,22 @@ create_swap() {
 	swapon /mnt/swap/swapfile
 }
 
-case $efi in
-/dev/*)
-	echo -e "\e[1;36mCREATING UEFI PARTITION\e[0m"
-	mkfs.fat -F 32 $efi
-	mdkir /mnt/boot
-	mount $efi /mnt/boot
-	;;
-esac
-
-echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
-pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh pacman-contrib bluez bluez-utils blueman
-genfstab -U /mnt >>/mnt/etc/fstab
+base_pkg() {
+	echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
+	pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh pacman-contrib bluez bluez-utils blueman
+	genfstab -U /mnt >>/mnt/etc/fstab
+}
 
 clear
 echo -e "\e[1;32mPart 2: Base System\e[0m"
 
-echo -e "\e[1;32\PACMAN CONFIG\e[0m"
-sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /mnt/etc/pacman.conf
-grep -q "ILoveCandy" /mnt/etc/pacman.conf || sed -i "/#VerbosePkgLists/a ILoveCandy" /mnt/etc/pacman.conf
-sed -i "/^#ParallelDownloads/s/=.*/= 5/;s/^#Color$/Color/" /mnt/etc/pacman.conf
-sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
+pacman_conf() {
+	echo -e "\e[1;32\PACMAN CONFIG\e[0m"
+	sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /mnt/etc/pacman.conf
+	grep -q "ILoveCandy" /mnt/etc/pacman.conf || sed -i "/#VerbosePkgLists/a ILoveCandy" /mnt/etc/pacman.conf
+	sed -i "/^#ParallelDownloads/s/=.*/= 5/;s/^#Color$/Color/" /mnt/etc/pacman.conf
+	sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
+}
 
 arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
 arch-chroot /mnt hwclock --systohc
@@ -251,6 +246,18 @@ timedatectl set-ntp true
 make_subvol
 mount_subvol
 create_swap
+
+case $efi in
+/dev/*)
+	echo -e "\e[1;36mCREATING UEFI PARTITION\e[0m"
+	mkfs.fat -F 32 $efi
+	mdkir /mnt/boot
+	mount $efi /mnt/boot
+	;;
+esac
+
+base_pkg
+pacman_conf
 
 for i in {5..1}; do
 	echo -e "\e[1;35mREBOOTING IN $i SECONDS...\e[0m"
