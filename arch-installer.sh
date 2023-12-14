@@ -181,21 +181,21 @@ EOF
 
 echo -e "\e[1;35mPACKAGES\e[0m"
 arch-chroot /mnt <<EOF
-sudo -i -u $username paru -Sy --noconfirm acpi bat btop catppuccin-gtk-theme-mocha deno easyeffects exa fd feh \
-                                          firefox fzf jdk8-openjdk jdk17-openjdk gamemode gimp gparted lf-bin \
+sudo -i -u $username paru -Sy --noconfirm acpi bat btop catppuccin-gtk-theme-mocha deno easyeffects eza fd feh \
+                                          firefox fzf jdk8-openjdk jdk17-openjdk gamemode gimp gparted lf \
                                           lib32-gamemode lib32-pipewire libqalculate libreoffice-fresh \
                                           man-db mesa \
                                           mpv mpv-mpris ncdu neofetch neovim ttf-firacode-nerd \
                                           newsboat noto-fonts noto-fonts-emoji npm obs-studio \
                                           openssh os-prober pavucontrol pcmanfm-gtk3 pipewire \
-                                          pipewire-pulse playerctl prismlauncher-bin python-pywal \
+                                          pipewire-pulse playerctl prismlauncher-qt5-bin python-pywal \
                                           qbittorrent qt6ct reflector ripgrep socat tldr tmux trash-cli \
-                                          ttf-ms-fonts ueberzug wget wine-staging winetricks wireplumber \
+                                          ttf-ms-fonts ueberzugpp wget wine-staging winetricks wireplumber \
                                           xbindkeys xclip xdg-desktop-portal-gtk xdotool \
                                           xf86-input-libinput xorg-xev xorg-xinput xorg-xrandr xorg-xset \
                                           xsel yt-dlp zathura zathura-pdf-mupdf zoxide \
                                           zsh-autosuggestions zsh-completions \
-                                          zsh-fast-syntax-highlighting zsh-history-substring-search zstd
+                                          zsh-fast-syntax-highlighting zsh-history-substring-search
 EOF
 
 case $nvidia in
