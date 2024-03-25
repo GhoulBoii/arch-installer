@@ -180,6 +180,7 @@ EOF
 
 echo -e "\e[1;35mPACKAGES\e[0m"
 arch-chroot /mnt <<EOF
+# FIX: sudo maybe not needed here??
 sudo -i -u $username paru -Sy --noconfirm acpi bat btop catppuccin-gtk-theme-mocha deno easyeffects eza fd feh \
                                           firefox fzf hyfetch jdk8-openjdk jdk17-openjdk gamemode gimp gparted lf \
                                           lib32-gamemode lib32-pipewire libqalculate libreoffice-fresh \
