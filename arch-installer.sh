@@ -126,24 +126,24 @@ EOF
 arch-chroot /mnt pacman -Sy --noconfirm xorg-server xorg-xinit
 
 grub_install() {
-echo -e "\e[1;32mGRUB\e[0m"
-case $efi in
-/dev/*)
-	arch-chroot /mnt pacman -Sy --noconfirm efibootmgr
-	arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
-	;;
-*)
-	arch-chroot /mnt grub-install --target=i386-pc $drive
-	;;
-esac
-arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+  echo -e "\e[1;32mGRUB\e[0m"
+  case $efi in
+  /dev/*)
+    arch-chroot /mnt pacman -Sy --noconfirm efibootmgr
+    arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+    ;;
+  *)
+    arch-chroot /mnt grub-install --target=i386-pc $drive
+    ;;
+  esac
+  arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 }
 
 user_creation() {
-echo -e "\e[1;32mUSER CREATION\e[0m"
-arch-chroot /mnt systemctl enable NetworkManager libvirtd paccache.timer bluetooth
-arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
-arch-chroot /mnt usermod -aG libvirt $username
+  echo -e "\e[1;32mUSER CREATION\e[0m"
+  arch-chroot /mnt systemctl enable NetworkManager libvirtd paccache.timer bluetooth
+  arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
+  arch-chroot /mnt usermod -aG libvirt $username
 }
 
 pass_user() {
