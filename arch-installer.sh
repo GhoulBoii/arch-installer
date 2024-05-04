@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-clear
-echo -e "\e[1;32mGhoulBoi's Arch Installer\e[0m"
-echo -e "\e[1;32mPart 1: Partition Setup\e[0m"
-
 input_drive() {
 	lsblk
 	read -p "Enter drive (Ex. - /dev/sda): " drive
@@ -102,9 +98,6 @@ base_pkg() {
 	genfstab -U /mnt >>/mnt/etc/fstab
 }
 
-clear
-echo -e "\e[1;32mPart 2: Base System\e[0m"
-
 pacman_conf() {
 	echo -e "\e[1;32\PACMAN CONFIG\e[0m"
 	sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /mnt/etc/pacman.conf
@@ -113,21 +106,26 @@ pacman_conf() {
 	sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
 }
 
-arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
-arch-chroot /mnt hwclock --systohc
-echo "en_US.UTF-8 UTF-8" >>/mnt/etc/locale.gen
-arch-chroot /mnt locale-gen
-echo "LANG=en_US.UTF-8" >>/mnt/etc/locale.conf
-echo $hostname >/mnt/etc/hostname
-echo "127.0.0.1 localhost" >>/mnt/etc/hosts
-echo "::1       localhost" >>/mnt/etc/hosts
-echo "127.0.1.1 $hostname.localdomain $hostname" >>/mnt/etc/hosts
+locale_hosts() {
+  arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
+  arch-chroot /mnt hwclock --systohc
+  echo "en_US.UTF-8 UTF-8" >>/mnt/etc/locale.gen
+  arch-chroot /mnt locale-gen
+  echo "LANG=en_US.UTF-8" >>/mnt/etc/locale.conf
+  echo $hostname >/mnt/etc/hostname
+  echo "127.0.0.1 localhost" >>/mnt/etc/hosts
+  echo "::1       localhost" >>/mnt/etc/hosts
+  echo "127.0.1.1 $hostname.localdomain $hostname" >>/mnt/etc/hosts
+}
+
 sed -i 's/MODULES=()/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
+pass_root
 arch-chroot /mnt <<EOF
 echo "root:$pass1" | chpasswd
 EOF
 arch-chroot /mnt pacman -Sy --noconfirm xorg-server xorg-xinit
 
+grub_install() {
 echo -e "\e[1;32mGRUB\e[0m"
 case $efi in
 /dev/*)
@@ -139,14 +137,21 @@ case $efi in
 	;;
 esac
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+}
 
+user_creation() {
 echo -e "\e[1;32mUSER CREATION\e[0m"
 arch-chroot /mnt systemctl enable NetworkManager libvirtd paccache.timer bluetooth
 arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
 arch-chroot /mnt usermod -aG libvirt $username
-arch-chroot /mnt <<EOF
-echo "$username:$pass1" | chpasswd
-EOF
+}
+
+pass_user() {
+  arch-chroot /mnt <<EOF
+  echo "$username:$pass1" | chpasswd
+  EOF
+}
+
 echo -e "$username ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" >>/mnt/etc/sudoers
 
 echo -e "\e[1;35mPart 3: Graphical Interface\e[0m"
@@ -228,6 +233,15 @@ sed -i '$d' /mnt/etc/sudoers
 arch-chroot /mnt sudo -i -u $username ln -sf /home/$username/.config/shell/profile /home/$username/.zprofile
 rm -rf /mnt/home/$username/.bash*
 
+
+
+
+
+
+
+clear
+echo -e "\e[1;32mGhoulBoi's Arch Installer\e[0m"
+echo -e "\e[1;32mPart 1: Partition Setup\e[0m"
 drive = input_drive
 linux = input_linux_part
 if [[ -d "/sys/firmware/efi" ]]; then
@@ -255,6 +269,9 @@ case $efi in
 	mount $efi /mnt/boot
 	;;
 esac
+
+clear
+echo -e "\e[1;32mPart 2: Base System\e[0m"
 
 base_pkg
 pacman_conf
