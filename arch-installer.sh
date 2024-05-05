@@ -95,6 +95,7 @@ create_swap() {
 install_base_pkg() {
 	echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
 	pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh pacman-contrib bluez bluez-utils blueman
+	pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh pacman-contrib bluez bluez-utils blueman xorg-server xorg-xinit
 	genfstab -U /mnt >>/mnt/etc/fstab
 }
 
@@ -118,11 +119,6 @@ conf_locale_hosts() {
   echo "127.0.1.1 $hostname.localdomain $hostname" >>/mnt/etc/hosts
 }
 
-arch-chroot /mnt <<EOF
-echo "root:$pass1" | chpasswd
-EOF
-arch-chroot /mnt pacman -Sy --noconfirm xorg-server xorg-xinit
-
 install_grub() {
   echo -e "\e[1;32mGRUB\e[0m"
   case $efi in
@@ -142,6 +138,12 @@ create_user() {
   arch-chroot /mnt systemctl enable NetworkManager libvirtd paccache.timer bluetooth
   arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
   arch-chroot /mnt usermod -aG libvirt $username
+}
+
+pass_root() {
+  arch-chroot /mnt <<EOF
+  echo "root:$pass1" | chpasswd
+  EOF
 }
 
 pass_user() {
