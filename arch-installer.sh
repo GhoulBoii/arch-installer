@@ -59,7 +59,7 @@ input_nvidia() {
 	return $nvidia
 }
 
-make_subvol() {
+create_subvol() {
 	echo -e "\e[1;36mCREATING SUBVOLUMES\e[0m"
 	mkfs.btrfs -fL Linux $linux
 	mount $linux /mnt
@@ -92,13 +92,13 @@ create_swap() {
 	swapon /mnt/swap/swapfile
 }
 
-base_pkg() {
+install_base_pkg() {
 	echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
 	pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh pacman-contrib bluez bluez-utils blueman
 	genfstab -U /mnt >>/mnt/etc/fstab
 }
 
-pacman_conf() {
+conf_pacman() {
 	echo -e "\e[1;32\PACMAN CONFIG\e[0m"
 	sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /mnt/etc/pacman.conf
 	grep -q "ILoveCandy" /mnt/etc/pacman.conf || sed -i "/#VerbosePkgLists/a ILoveCandy" /mnt/etc/pacman.conf
@@ -106,7 +106,7 @@ pacman_conf() {
 	sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
 }
 
-locale_hosts() {
+conf_locale_hosts() {
   arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
   arch-chroot /mnt hwclock --systohc
   echo "en_US.UTF-8 UTF-8" >>/mnt/etc/locale.gen
@@ -118,14 +118,12 @@ locale_hosts() {
   echo "127.0.1.1 $hostname.localdomain $hostname" >>/mnt/etc/hosts
 }
 
-sed -i 's/MODULES=()/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
-pass_root
 arch-chroot /mnt <<EOF
 echo "root:$pass1" | chpasswd
 EOF
 arch-chroot /mnt pacman -Sy --noconfirm xorg-server xorg-xinit
 
-grub_install() {
+install_grub() {
   echo -e "\e[1;32mGRUB\e[0m"
   case $efi in
   /dev/*)
@@ -139,7 +137,7 @@ grub_install() {
   arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 }
 
-user_creation() {
+create_user() {
   echo -e "\e[1;32mUSER CREATION\e[0m"
   arch-chroot /mnt systemctl enable NetworkManager libvirtd paccache.timer bluetooth
   arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
@@ -152,11 +150,11 @@ pass_user() {
   EOF
 }
 
-echo -e "$username ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" >>/mnt/etc/sudoers
 
 echo -e "\e[1;35mPart 3: Graphical Interface\e[0m"
 clear
 
+echo -e "$username ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" >>/mnt/etc/sudoers
 nc=$(grep -c ^processor /proc/cpuinfo)
 sed -i "s/#MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j$nc\"/g" /mnt/etc/makepkg.conf
 sed -i "s/COMPRESSXZ=(xz -c -z -)/COMPRESSXZ=(xz -c -T $nc -z -)/g" /mnt/etc/makepkg.conf
@@ -217,68 +215,72 @@ sudo -i -u $username paru -Sy --noconfirm acpi bat btop catppuccin-gtk-theme-moc
                                           zsh-autosuggestions zsh-completions \
                                           zsh-fast-syntax-highlighting zsh-history-substring-search zstd
 EOF
-
-case $nvidia in
-1)
-	echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
-	arch-chroot /mnt sudo -i -u $username paru -S --noconfirm nvidia-dkms nvidia-utils lib32-nvidia-utils
-	;;
-2)
-	echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
-	arch-chroot /mnt sudo -i -u $username paru -S --noconfirm nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
-	;;
-esac
-
-sed -i '$d' /mnt/etc/sudoers
-arch-chroot /mnt sudo -i -u $username ln -sf /home/$username/.config/shell/profile /home/$username/.zprofile
-rm -rf /mnt/home/$username/.bash*
-
-
-
-
+install_nvidia {
+  case $nvidia in
+  1)
+    echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
+    arch-chroot /mnt sudo -i -u $username paru -S --noconfirm nvidia-dkms nvidia-utils lib32-nvidia-utils
+    ;;
+  2)
+    echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
+    arch-chroot /mnt sudo -i -u $username paru -S --noconfirm nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
+    ;;
+  esac
+}
+post_install_cleanup() {
+  sed -i '$d' /mnt/etc/sudoers
+  arch-chroot /mnt sudo -i -u $username ln -sf /home/$username/.config/shell/profile /home/$username/.zprofile
+  rm -rf /mnt/home/$username/.bash*
+}
 
 
 
-clear
-echo -e "\e[1;32mGhoulBoi's Arch Installer\e[0m"
-echo -e "\e[1;32mPart 1: Partition Setup\e[0m"
-drive = input_drive
-linux = input_linux_part
-if [[ -d "/sys/firmware/efi" ]]; then
-	efi = input_efi_part
-fi
-hostname = input_host
-username = input_user
-pass = input_pass
-nvidia = input_nvidia
 
-sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
-pacman --noconfirm -Sy archlinux-keyring
-reflector -c $(curl https://ifconfig.co/country-iso) --sort rate -a 24 -f 5 -p https --save /etc/pacman.d/mirrorlist
-timedatectl set-ntp true
 
-make_subvol
-mount_subvol
-create_swap
+{
+  clear
+  echo -e "\e[1;32mGhoulBoi's Arch Installer\e[0m"
+  echo -e "\e[1;32mPart 1: Partition Setup\e[0m"
+  drive = input_drive
+  linux = input_linux_part
+  if [[ -d "/sys/firmware/efi" ]]; then
+    efi = input_efi_part
+  fi
+  hostname = input_host
+  username = input_user
+  pass = input_pass
+  nvidia = input_nvidia
 
-case $efi in
-/dev/*)
-	echo -e "\e[1;36mCREATING UEFI PARTITION\e[0m"
-	mkfs.fat -F 32 $efi
-	mdkir /mnt/boot
-	mount $efi /mnt/boot
-	;;
-esac
+  sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
+  pacman --noconfirm -Sy archlinux-keyring
+  reflector -c $(curl https://ifconfig.co/country-iso) --sort rate -a 24 -f 5 -p https --save /etc/pacman.d/mirrorlist
+  timedatectl set-ntp true
 
-clear
-echo -e "\e[1;32mPart 2: Base System\e[0m"
+  create_subvol
+  mount_subvol
+  create_swap
 
-base_pkg
-pacman_conf
+  case $efi in
+  /dev/*)
+    echo -e "\e[1;36mCREATING UEFI PARTITION\e[0m"
+    mkfs.fat -F 32 $efi
+    mdkir /mnt/boot
+    mount $efi /mnt/boot
+    ;;
+  esac
 
-for i in {5..1}; do
-	echo -e "\e[1;35mREBOOTING IN $i SECONDS...\e[0m"
-	sleep 1
-done
-echo -e "\e[1;35mSCRIPT FINISHED! REBOOTING NOW...\e[0m"
-reboot
+  clear
+  echo -e "\e[1;32mPart 2: Base System\e[0m"
+
+  instal_base_pkg
+  pacman_conf
+  conf_locale_hosts
+  sed -i 's/MODULES=()/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
+
+  for i in {5..1}; do
+    echo -e "\e[1;35mREBOOTING IN $i SECONDS...\e[0m"
+    sleep 1
+  done
+  echo -e "\e[1;35mSCRIPT FINISHED! REBOOTING NOW...\e[0m"
+  reboot
+ }
