@@ -237,7 +237,7 @@ post_install_cleanup() {
 
 
 
-{
+main() {
   clear
   echo -e "\e[1;32mGhoulBoi's Arch Installer\e[0m"
   echo -e "\e[1;32mPart 1: Partition Setup\e[0m"
