@@ -276,7 +276,7 @@ main() {
   clear
   echo -e "\e[1;32mPart 2: Base System\e[0m"
 
-  instal_base_pkg
+  install_base_pkg
   pacman_conf
   conf_locale_hosts
   sed -i 's/MODULES=()/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
@@ -288,3 +288,4 @@ main() {
   echo -e "\e[1;35mSCRIPT FINISHED! REBOOTING NOW...\e[0m"
   reboot
  }
+ main "$@"
