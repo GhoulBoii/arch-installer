@@ -92,6 +92,13 @@ create_swap() {
 	swapon /mnt/swap/swapfile
 }
 
+create_efi() {
+  echo -e "\e[1;36mCREATING UEFI PARTITION\e[0m"
+  mkfs.fat -F 32 $1
+  mdkir /mnt/boot
+  mount $1 /mnt/boot
+}
+
 install_base_pkg() {
 	echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
 	pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh pacman-contrib bluez bluez-utils blueman xorg-server xorg-xinit
@@ -263,11 +270,7 @@ main() {
 
   case $efi in
   /dev/*)
-    echo -e "\e[1;36mCREATING UEFI PARTITION\e[0m"
-    mkfs.fat -F 32 $efi
-    mdkir /mnt/boot
-    mount $efi /mnt/boot
-    ;;
+    create_efi "$efi"
   esac
 
   clear
