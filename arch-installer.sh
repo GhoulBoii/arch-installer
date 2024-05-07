@@ -94,7 +94,6 @@ create_swap() {
 
 install_base_pkg() {
 	echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
-	pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh pacman-contrib bluez bluez-utils blueman
 	pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh pacman-contrib bluez bluez-utils blueman xorg-server xorg-xinit
 	genfstab -U /mnt >>/mnt/etc/fstab
 }
