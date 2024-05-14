@@ -1,95 +1,95 @@
 #!/usr/bin/env bash
 
 input_drive() {
-	lsblk >&2
-	read -p "Enter drive (Ex. - /dev/sda): " drive
-	cfdisk $drive >&2
-	echo $drive
+  lsblk >&2
+  read -p "Enter drive (Ex. - /dev/sda): " drive
+  cfdisk $drive >&2
+  echo $drive
 }
 
 input_linux_part() {
-	lsblk >&2
-	read -p "Enter the Linux Partition (Ex. - /dev/sda2): " linux
-	echo $linux
+  lsblk >&2
+  read -p "Enter the Linux Partition (Ex. - /dev/sda2): " linux
+  echo $linux
 }
 
 input_efi_part() {
-	read -p "Enter EFI partition (Ex. - /dev/sda2): " efi
-	echo $efi
+  read -p "Enter EFI partition (Ex. - /dev/sda2): " efi
+  echo $efi
 }
 
 input_host() {
-	while true :; do
-		read -p "Enter the hostname: " hostname
-		if [[ "${hostname}" =~ ^[a-z][a-z0-9_.-]{0,62}[a-z0-9]$ ]]; then
-			break
-		fi
-		echo -e "\e[1;31mIncorrect Hostname!\e[0m" >&2
-	done
-	echo $hostname
+  while true :; do
+    read -p "Enter the hostname: " hostname
+    if [[ "${hostname}" =~ ^[a-z][a-z0-9_.-]{0,62}[a-z0-9]$ ]]; then
+      break
+    fi
+    echo -e "\e[1;31mIncorrect Hostname!\e[0m" >&2
+  done
+  echo $hostname
 }
 
 input_user() {
-	while true :; do
-		read -p "Enter username: " username
-		if [[ "${username}" =~ ^[a-z_]([a-z0-9_-]{0,31}|[a-z0-9_-]{0,30}\$)$ ]]; then
-			break
-		fi
-		echo -e "\e[1;31mIncorrect Username!\e[0m" >&2
-	done
-	echo $username
+  while true :; do
+    read -p "Enter username: " username
+    if [[ "${username}" =~ ^[a-z_]([a-z0-9_-]{0,31}|[a-z0-9_-]{0,30}\$)$ ]]; then
+      break
+    fi
+    echo -e "\e[1;31mIncorrect Username!\e[0m" >&2
+  done
+  echo $username
 }
 
 input_pass() {
-	while true :; do
-		read -sp "Enter password: " pass1
-		echo "" >&2
-		read -sp "Re-enter password: " pass2
-		if [[ "${pass1}" = "${pass2}" ]]; then
-			break
-		fi
-		echo -e "\n\e[1;31mPasswords don't match.\e[0m" >&2
-	done
-	echo $pass1
+  while true :; do
+    read -sp "Enter password: " pass1
+    echo "" >&2
+    read -sp "Re-enter password: " pass2
+    if [[ "${pass1}" = "${pass2}" ]]; then
+      break
+    fi
+    echo -e "\n\e[1;31mPasswords don't match.\e[0m" >&2
+  done
+  echo $pass1
 }
 
 input_nvidia() {
-	echo -e "\nAmd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users." >&2
-	read -p "Enter which graphics driver you use (Enter \"1\" for Nvidia or \"2\" for Legacy Nvidia Drivers (Driver 390): " nvidia
-	echo $nvidia
+  echo -e "\nAmd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users." >&2
+  read -p "Enter which graphics driver you use (Enter \"1\" for Nvidia or \"2\" for Legacy Nvidia Drivers (Driver 390): " nvidia
+  echo $nvidia
 }
 
 create_subvol() {
-	echo -e "\e[1;36mCREATING SUBVOLUMES\e[0m"
-	mkfs.btrfs -fL Linux $1
-	mount $1 /mnt
-	btrfs subvolume create /mnt/@
-	btrfs subvolume create /mnt/@home
-	btrfs subvolume create /mnt/@swap
-	btrfs subvolume create /mnt/@var
-	btrfs subvolume create /mnt/@tmp
-	umount /mnt
+  echo -e "\e[1;36mCREATING SUBVOLUMES\e[0m"
+  mkfs.btrfs -fL Linux $1
+  mount $1 /mnt
+  btrfs subvolume create /mnt/@
+  btrfs subvolume create /mnt/@home
+  btrfs subvolume create /mnt/@swap
+  btrfs subvolume create /mnt/@var
+  btrfs subvolume create /mnt/@tmp
+  umount /mnt
 }
 
 mount_subvol() {
-	echo -e "\e[1;36mMOUNTING SUBVOLUMES\e[0m"
-	mount -o noatime,discard=async,compress=zstd:2,subvol=@ $1 /mnt
-	mkdir /mnt/{home,swap,var,tmp}
-	mount -o noatime,compress=zstd:2,subvol=@home $1 /mnt/home
-	mount -o nodatacow,subvol=@swap $1 /mnt/swap
-	mount -o nodatacow,subvol=@var $1 /mnt/var
-	mount -o noatime,compress=zstd:2,subvol=@tmp $1 /mnt/tmp
+  echo -e "\e[1;36mMOUNTING SUBVOLUMES\e[0m"
+  mount -o noatime,discard=async,compress=zstd:2,subvol=@ $1 /mnt
+  mkdir /mnt/{home,swap,var,tmp}
+  mount -o noatime,compress=zstd:2,subvol=@home $1 /mnt/home
+  mount -o nodatacow,subvol=@swap $1 /mnt/swap
+  mount -o nodatacow,subvol=@var $1 /mnt/var
+  mount -o noatime,compress=zstd:2,subvol=@tmp $1 /mnt/tmp
 }
 
 create_swap() {
-	echo -e "\e[1;36mCREATING SWAP\e[0m"
-	truncate -s 0 /mnt/swap/swapfile
-	chattr +C /mnt/swap/swapfile
-	dd if=/dev/zero of=/mnt/swap/swapfile bs=1M count=2048
-	chmod 600 /mnt/swap/swapfile
-	chown root /mnt/swap/swapfile
-	mkswap /mnt/swap/swapfile
-	swapon /mnt/swap/swapfile
+  echo -e "\e[1;36mCREATING SWAP\e[0m"
+  truncate -s 0 /mnt/swap/swapfile
+  chattr +C /mnt/swap/swapfile
+  dd if=/dev/zero of=/mnt/swap/swapfile bs=1M count=2048
+  chmod 600 /mnt/swap/swapfile
+  chown root /mnt/swap/swapfile
+  mkswap /mnt/swap/swapfile
+  swapon /mnt/swap/swapfile
 }
 
 create_efi() {
@@ -100,17 +100,17 @@ create_efi() {
 }
 
 install_base_pkg() {
-	echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
-	pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh pacman-contrib bluez bluez-utils blueman xorg-server xorg-xinit
-	genfstab -U /mnt >>/mnt/etc/fstab
+  echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
+  pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh pacman-contrib bluez bluez-utils blueman xorg-server xorg-xinit
+  genfstab -U /mnt >>/mnt/etc/fstab
 }
 
 conf_pacman() {
-	echo -e "\e[1;32\PACMAN CONFIG\e[0m"
-	sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /mnt/etc/pacman.conf
-	grep -q "ILoveCandy" /mnt/etc/pacman.conf || sed -i "/#VerbosePkgLists/a ILoveCandy" /mnt/etc/pacman.conf
-	sed -i "/^#ParallelDownloads/s/=.*/= 5/;s/^#Color$/Color/" /mnt/etc/pacman.conf
-	sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
+  echo -e "\e[1;32\PACMAN CONFIG\e[0m"
+  sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /mnt/etc/pacman.conf
+  grep -q "ILoveCandy" /mnt/etc/pacman.conf || sed -i "/#VerbosePkgLists/a ILoveCandy" /mnt/etc/pacman.conf
+  sed -i "/^#ParallelDownloads/s/=.*/= 5/;s/^#Color$/Color/" /mnt/etc/pacman.conf
+  sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf
 }
 
 conf_locale_hosts() {
@@ -128,13 +128,13 @@ conf_locale_hosts() {
 install_grub() {
   echo -e "\e[1;32mGRUB\e[0m"
   case $1 in
-  /dev/*)
-    arch-chroot /mnt pacman -Sy --noconfirm efibootmgr
-    arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
-    ;;
-  *)
-    arch-chroot /mnt grub-install --target=i386-pc $2
-    ;;
+    /dev/*)
+      arch-chroot /mnt pacman -Sy --noconfirm efibootmgr
+      arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+      ;;
+    *)
+      arch-chroot /mnt grub-install --target=i386-pc $2
+      ;;
   esac
   arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 }
@@ -229,7 +229,8 @@ install_packages() {
                                           xsel yt-dlp zathura zathura-pdf-mupdf zoxide \
                                           zsh-autosuggestions zsh-completions \
                                           zsh-fast-syntax-highlighting zsh-history-substring-search zstd
-EOF
+  EOF
+}
 install_nvidia() {
   case $1 in
     1)
@@ -276,8 +277,8 @@ main() {
   create_swap
 
   case $efi in
-  /dev/*)
-    create_efi "$efi"
+    /dev/*)
+      create_efi "$efi"
   esac
 
   clear
@@ -310,5 +311,5 @@ main() {
   done
   echo -e "\e[1;35mSCRIPT FINISHED! REBOOTING NOW...\e[0m"
   reboot
- }
- main "$@"
+}
+main "$@"
