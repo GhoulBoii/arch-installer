@@ -210,7 +210,7 @@ sudo -i -u $username paru -Sy --noconfirm acpi bat btop catppuccin-gtk-theme-moc
                                           zsh-autosuggestions zsh-completions \
                                           zsh-fast-syntax-highlighting zsh-history-substring-search zstd
 EOF
-install_nvidia {
+input_nvidia {
   case $nvidia in
   1)
     echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
@@ -264,7 +264,7 @@ main() {
   echo -e "\e[1;32mPart 2: Base System\e[0m"
 
   install_base_pkg
-  pacman_conf
+  conf_pacman
   conf_locale_hosts
   install_grub "$efi" "$drive"
   create_user "$username"
