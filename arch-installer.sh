@@ -147,11 +147,15 @@ create_user() {
 }
 
 pass_root() {
-  arch-chroot /mnt echo "root:$1" | chpasswd
+  arch-chroot /mnt <<EOF
+  echo "root:$1" | chpasswd
+  EOF
 }
 
 pass_user() {
-  arch-chroot /mnt echo "$1:$2" | chpasswd
+  arch-chroot /mnt <<EOF
+  echo "$1:$2" | chpasswd
+  EOF
 }
 
 arch-chroot /mnt sudo -i -u $username bash <<EOF
