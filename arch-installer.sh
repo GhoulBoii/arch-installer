@@ -73,12 +73,12 @@ create_subvol() {
 
 mount_subvol() {
 	echo -e "\e[1;36mMOUNTING SUBVOLUMES\e[0m"
-	mount -o noatime,discard=async,compress=zstd:2,subvol=@ $linux /mnt
+	mount -o noatime,discard=async,compress=zstd:2,subvol=@ $1 /mnt
 	mkdir /mnt/{home,swap,var,tmp}
-	mount -o noatime,compress=zstd:2,subvol=@home $linux /mnt/home
-	mount -o nodatacow,subvol=@swap $linux /mnt/swap
-	mount -o nodatacow,subvol=@var $linux /mnt/var
-	mount -o noatime,compress=zstd:2,subvol=@tmp $linux /mnt/tmp
+	mount -o noatime,compress=zstd:2,subvol=@home $1 /mnt/home
+	mount -o nodatacow,subvol=@swap $1 /mnt/swap
+	mount -o nodatacow,subvol=@var $1 /mnt/var
+	mount -o noatime,compress=zstd:2,subvol=@tmp $1 /mnt/tmp
 }
 
 create_swap() {
@@ -251,8 +251,8 @@ main() {
   reflector -c $(curl https://ifconfig.co/country-iso) --sort rate -a 24 -f 5 -p https --save /etc/pacman.d/mirrorlist
   timedatectl set-ntp true
 
-  create_subvol
-  mount_subvol
+  create_subvol "$drive"
+  mount_subvol "$drive"
   create_swap
 
   case $efi in
