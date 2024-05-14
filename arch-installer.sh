@@ -4,18 +4,18 @@ input_drive() {
 	lsblk
 	read -p "Enter drive (Ex. - /dev/sda): " drive
 	cfdisk $drive
-	return $drive
+	echo $drive
 }
 
 input_linux_part() {
 	lsblk
 	read -p "Enter the Linux Partition (Ex. - /dev/sda2): " linux
-	return $linux
+	echo $linux
 }
 
 input_efi_part() {
 	read -p "Enter EFI partition (Ex. - /dev/sda2): " efi
-	return $efi
+	echo $efi
 }
 
 input_host() {
@@ -26,7 +26,7 @@ input_host() {
 		fi
 		echo -e "\e[1;31mIncorrect Hostname!\e[0m"
 	done
-	return $hostname
+	echo $hostname
 }
 
 input_user() {
@@ -37,7 +37,7 @@ input_user() {
 		fi
 		echo -e "\e[1;31mIncorrect Username!\e[0m"
 	done
-	return $username
+	echo $username
 }
 
 input_pass() {
@@ -50,13 +50,13 @@ input_pass() {
 		fi
 		echo -e "\n\e[1;31mPasswords don't match.\e[0m"
 	done
-	return $pass1
+	echo $pass1
 }
 
 input_nvidia() {
 	echo -e "\nAmd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users."
 	read -p "Enter which graphics driver you use (Enter \"1\" for Nvidia or \"2\" for Legacy Nvidia Drivers (Driver 390): " nvidia
-	return $nvidia
+	echo $nvidia
 }
 
 create_subvol() {
