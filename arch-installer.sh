@@ -249,15 +249,15 @@ main() {
   clear
   echo -e "\e[1;32mGhoulBoi's Arch Installer\e[0m"
   echo -e "\e[1;32mPart 1: Partition Setup\e[0m"
-  drive = input_drive
-  linux = input_linux_part
+  drive=$(input_drive)
+  linux=$(input_linux_part)
   if [[ -d "/sys/firmware/efi" ]]; then
-    efi = input_efi_part
+    efi=$(input_efi_part)
   fi
-  hostname = input_host
-  username = input_user
-  pass = input_pass
-  nvidia = input_nvidia
+  hostname=$(input_host)
+  username=$(input_user)
+  pass=$(input_pass)
+  nvidia=$(input_nvidia)
 
   sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
   pacman --noconfirm -Sy archlinux-keyring
