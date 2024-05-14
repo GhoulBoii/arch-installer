@@ -210,7 +210,7 @@ sudo -i -u $username paru -Sy --noconfirm acpi bat btop catppuccin-gtk-theme-moc
                                           zsh-autosuggestions zsh-completions \
                                           zsh-fast-syntax-highlighting zsh-history-substring-search zstd
 EOF
-input_nvidia {
+install_nvidia() {
   case $nvidia in
   1)
     echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
@@ -269,7 +269,7 @@ main() {
   install_grub "$efi" "$drive"
   create_user "$username"
   pass_root "$pass"
-  pass_user "$usernam" "$pass"
+  pass_user "$username" "$pass"
   sed -i 's/MODULES=()/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
 
   for i in {5..1}; do
