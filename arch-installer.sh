@@ -61,8 +61,8 @@ input_nvidia() {
 
 create_subvol() {
 	echo -e "\e[1;36mCREATING SUBVOLUMES\e[0m"
-	mkfs.btrfs -fL Linux $linux
-	mount $linux /mnt
+	mkfs.btrfs -fL Linux $1
+	mount $1 /mnt
 	btrfs subvolume create /mnt/@
 	btrfs subvolume create /mnt/@home
 	btrfs subvolume create /mnt/@swap
@@ -127,13 +127,13 @@ conf_locale_hosts() {
 
 install_grub() {
   echo -e "\e[1;32mGRUB\e[0m"
-  case $efi in
+  case $1 in
   /dev/*)
     arch-chroot /mnt pacman -Sy --noconfirm efibootmgr
     arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
     ;;
   *)
-    arch-chroot /mnt grub-install --target=i386-pc $drive
+    arch-chroot /mnt grub-install --target=i386-pc $2
     ;;
   esac
   arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
@@ -142,30 +142,17 @@ install_grub() {
 create_user() {
   echo -e "\e[1;32mUSER CREATION\e[0m"
   arch-chroot /mnt systemctl enable NetworkManager libvirtd paccache.timer bluetooth
-  arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
-  arch-chroot /mnt usermod -aG libvirt $username
+  arch-chroot /mnt useradd -mG wheel -s /bin/zsh $1
+  arch-chroot /mnt usermod -aG libvirt $1
 }
 
 pass_root() {
-  arch-chroot /mnt <<EOF
-  echo "root:$pass1" | chpasswd
-  EOF
+  arch-chroot /mnt echo "root:$1" | chpasswd
 }
 
 pass_user() {
-  arch-chroot /mnt <<EOF
-  echo "$username:$pass1" | chpasswd
-  EOF
+  arch-chroot /mnt echo "$1:$2" | chpasswd
 }
-
-
-echo -e "\e[1;35mPart 3: Graphical Interface\e[0m"
-clear
-
-echo -e "$username ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" >>/mnt/etc/sudoers
-nc=$(grep -c ^processor /proc/cpuinfo)
-sed -i "s/#MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j$nc\"/g" /mnt/etc/makepkg.conf
-sed -i "s/COMPRESSXZ=(xz -c -z -)/COMPRESSXZ=(xz -c -T $nc -z -)/g" /mnt/etc/makepkg.conf
 
 arch-chroot /mnt sudo -i -u $username bash <<EOF
 cd
@@ -279,6 +266,10 @@ main() {
   install_base_pkg
   pacman_conf
   conf_locale_hosts
+  install_grub "$efi" "$drive"
+  create_user "$username"
+  pass_root "$pass"
+  pass_user "$usernam" "$pass"
   sed -i 's/MODULES=()/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
 
   for i in {5..1}; do
