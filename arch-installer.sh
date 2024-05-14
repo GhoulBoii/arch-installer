@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 input_drive() {
-	lsblk
+	lsblk >&2
 	read -p "Enter drive (Ex. - /dev/sda): " drive
-	cfdisk $drive
+	cfdisk $drive >&2
 	echo $drive
 }
 
 input_linux_part() {
-	lsblk
+	lsblk >&2
 	read -p "Enter the Linux Partition (Ex. - /dev/sda2): " linux
 	echo $linux
 }
@@ -24,7 +24,7 @@ input_host() {
 		if [[ "${hostname}" =~ ^[a-z][a-z0-9_.-]{0,62}[a-z0-9]$ ]]; then
 			break
 		fi
-		echo -e "\e[1;31mIncorrect Hostname!\e[0m"
+		echo -e "\e[1;31mIncorrect Hostname!\e[0m" >&2
 	done
 	echo $hostname
 }
@@ -35,7 +35,7 @@ input_user() {
 		if [[ "${username}" =~ ^[a-z_]([a-z0-9_-]{0,31}|[a-z0-9_-]{0,30}\$)$ ]]; then
 			break
 		fi
-		echo -e "\e[1;31mIncorrect Username!\e[0m"
+		echo -e "\e[1;31mIncorrect Username!\e[0m" >&2
 	done
 	echo $username
 }
@@ -43,18 +43,18 @@ input_user() {
 input_pass() {
 	while true :; do
 		read -sp "Enter password: " pass1
-		echo ""
+		echo "" >&2
 		read -sp "Re-enter password: " pass2
 		if [[ "${pass1}" = "${pass2}" ]]; then
 			break
 		fi
-		echo -e "\n\e[1;31mPasswords don't match.\e[0m"
+		echo -e "\n\e[1;31mPasswords don't match.\e[0m" >&2
 	done
 	echo $pass1
 }
 
 input_nvidia() {
-	echo -e "\nAmd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users."
+	echo -e "\nAmd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users." >&2
 	read -p "Enter which graphics driver you use (Enter \"1\" for Nvidia or \"2\" for Legacy Nvidia Drivers (Driver 390): " nvidia
 	echo $nvidia
 }
