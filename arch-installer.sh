@@ -215,21 +215,21 @@ sudo -i -u $username paru -Sy --noconfirm acpi bat btop catppuccin-gtk-theme-moc
                                           zsh-fast-syntax-highlighting zsh-history-substring-search zstd
 EOF
 install_nvidia() {
-  case $nvidia in
-  1)
-    echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
-    arch-chroot /mnt sudo -i -u $username paru -S --noconfirm nvidia-dkms nvidia-utils lib32-nvidia-utils
-    ;;
-  2)
-    echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
-    arch-chroot /mnt sudo -i -u $username paru -S --noconfirm nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
-    ;;
+  case $1 in
+    1)
+      echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
+      arch-chroot /mnt sudo -i -u $2 paru -S --noconfirm nvidia-dkms nvidia-utils lib32-nvidia-utils
+      ;;
+    2)
+      echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
+      arch-chroot /mnt sudo -i -u $2 paru -S --noconfirm nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
+      ;;
   esac
 }
 post_install_cleanup() {
   sed -i '$d' /mnt/etc/sudoers
-  arch-chroot /mnt sudo -i -u $username ln -sf /home/$username/.config/shell/profile /home/$username/.zprofile
-  rm -rf /mnt/home/$username/.bash*
+  arch-chroot /mnt sudo -i -u $1 ln -sf /home/$1/.config/shell/profile /home/$1/.zprofile
+  rm -rf /mnt/home/$1/.bash*
 }
 
 
@@ -276,6 +276,12 @@ main() {
   pass_user "$username" "$pass"
   sed -i 's/MODULES=()/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
 
+
+  echo -e "\e[1;35mPart 3: Graphical Interface\e[0m"
+  clear
+
+  install_nvidia "$nvidia" "$username"
+  post_install_cleanup "$username"
   for i in {5..1}; do
     echo -e "\e[1;35mREBOOTING IN $i SECONDS...\e[0m"
     sleep 1
