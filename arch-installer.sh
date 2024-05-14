@@ -158,47 +158,63 @@ pass_user() {
   EOF
 }
 
-arch-chroot /mnt sudo -i -u $username bash <<EOF
-cd
-echo -e "\e[1;35mDOTFILES\e[0m"
-git clone --depth=1 --separate-git-dir=.dots https://github.com/ghoulboii/dotfiles.git tmpdotfiles
-rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
-rm -rf tmpdotfiles
-/usr/bin/git --git-dir=.dots/ --work-tree=~ config --local status.showUntrackedFiles no
-mkdir ~/{dl,doc,pics}
-xdg-user-dirs-update
+setup_dotfiles() {
+  arch-chroot /mnt sudo -i -u $username bash <<EOF
+  cd
+  echo -e "\e[1;35mDOTFILES\e[0m"
+  git clone --depth=1 --separate-git-dir=.dots https://github.com/ghoulboii/dotfiles.git tmpdotfiles
+  rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
+  rm -rf tmpdotfiles
+  /usr/bin/git --git-dir=.dots/ --work-tree=~ config --local status.showUntrackedFiles no
+  mkdir ~/{dl,doc,pics}
+  xdg-user-dirs-update
+  EOF
+}
 
-echo -e "\e[1;35mPARU\e[0m"
-git clone --depth=1 https://aur.archlinux.org/paru-bin.git ~/.local/src/paru
-cd ~/.local/src/paru
-makepkg --noconfirm -rsi
-rm -rf ~/.local/src/paru
+setup_paru() {
+  echo -e "\e[1;35mPARU\e[0m"
+  git clone --depth=1 https://aur.archlinux.org/paru-bin.git ~/.local/src/paru
+  cd ~/.local/src/paru
+  makepkg --noconfirm -rsi
+  rm -rf ~/.local/src/paru
+}
 
-echo -e "\e[1;35mDWM\e[0m"
-cd
-paru -S --noconfirm libxft libxinerama
-git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
-sudo make -sC ~/.local/src/dwm install
+setup_dwm() {
+  echo -e "\e[1;35mDWM\e[0m"
+  cd
+  paru -S --noconfirm libxft libxinerama
+  git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
+  sudo make -sC ~/.local/src/dwm install
+}
 
-echo -e "\e[1;35mDWMBLOCKS\e[0m"
-git clone --depth=1 https://github.com/ghoulboii/dwmblocks.git ~/.local/src/dwmblocks
-sudo make -sC ~/.local/src/dwmblocks install
+setup_dwmblocks() {
+  echo -e "\e[1;35mDWMBLOCKS\e[0m"
+  git clone --depth=1 https://github.com/ghoulboii/dwmblocks.git ~/.local/src/dwmblocks
+  sudo make -sC ~/.local/src/dwmblocks install
+}
 
-echo -e "\e[1;35mST\e[0m"
-git clone --depth=1 https://github.com/ghoulboii/st.git ~/.local/src/st
-sudo make -sC ~/.local/src/st install
+setup_st() {
+  echo -e "\e[1;35mST\e[0m"
+  git clone --depth=1 https://github.com/ghoulboii/st.git ~/.local/src/st
+  sudo make -sC ~/.local/src/st install
+}
 
-echo -e "\e[1;35mDMENU\e[0m"
-git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
-sudo make -sC ~/.local/src/dmenu install
+setup_dmenu() {
+  echo -e "\e[1;35mDMENU\e[0m"
+  git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
+  sudo make -sC ~/.local/src/dmenu install
+}
 
-echo -e "\e[1;35mNEOVIM\e[0m"
-git clone --depth=1 https://github.com/ghoulboii/nvim.git ~/.config/nvim
-EOF
+setup_neovim() {
+  echo -e "\e[1;35mNEOVIM\e[0m"
+  git clone --depth=1 https://github.com/ghoulboii/nvim.git ~/.config/nvim
+  EOF
+}
 
-echo -e "\e[1;35mPACKAGES\e[0m"
-arch-chroot /mnt <<EOF
-sudo -i -u $username paru -Sy --noconfirm acpi bat btop catppuccin-gtk-theme-mocha deno easyeffects exa fd feh \
+install_packages() {
+  echo -e "\e[1;35mPACKAGES\e[0m"
+  arch-chroot /mnt <<EOF
+  sudo -i -u $username paru -Sy --noconfirm acpi bat btop catppuccin-gtk-theme-mocha deno easyeffects exa fd feh \
                                           firefox fzf jdk8-openjdk jdk17-openjdk gamemode gimp gparted lf-bin \
                                           lib32-gamemode lib32-pipewire libqalculate libreoffice-fresh \
                                           man-db mesa \
@@ -282,6 +298,12 @@ main() {
 
   install_nvidia "$nvidia" "$username"
   post_install_cleanup "$username"
+
+  echo -e "$username ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" >>/mnt/etc/sudoers
+  nc=$(grep -c ^processor /proc/cpuinfo)
+  sed -i "s/#MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j$nc\"/g" /mnt/etc/makepkg.conf
+  sed -i "s/COMPRESSXZ=(xz -c -z -)/COMPRESSXZ=(xz -c -T $nc -z -)/g" /mnt/etc/makepkg.conf
+
   for i in {5..1}; do
     echo -e "\e[1;35mREBOOTING IN $i SECONDS...\e[0m"
     sleep 1
