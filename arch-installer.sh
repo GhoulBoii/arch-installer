@@ -311,6 +311,8 @@ main() {
   setup_st "$username"
   setup_dmenu "$username"
   setup_neovim "$username"
+
+  install_packages "$username"
   install_nvidia "$nvidia" "$username"
   post_install_cleanup "$username"
 
