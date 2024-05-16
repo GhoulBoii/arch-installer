@@ -142,15 +142,11 @@ create_user() {
 }
 
 pass_root() {
-  arch-chroot /mnt <<EOF
-  echo "root:$1" | chpasswd
-  EOF
+  arch-chroot /mnt bash -c "echo root:$1 | chpasswd"
 }
 
 pass_user() {
-  arch-chroot /mnt <<EOF
-  echo "$1:$2" | chpasswd
-  EOF
+  arch-chroot /mnt bash -c "echo "$1:$2" | chpasswd"
 }
 
 setup_dotfiles() {
