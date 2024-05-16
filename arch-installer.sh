@@ -172,40 +172,51 @@ setup_dotfiles() {
 }
 
 setup_paru() {
+  arch-chroot /mnt sudo -i -u $username bash <<EOF
   echo -e "\e[1;35mPARU\e[0m"
   git clone --depth=1 https://aur.archlinux.org/paru-bin.git ~/.local/src/paru
   cd ~/.local/src/paru
   makepkg --noconfirm -rsi
   rm -rf ~/.local/src/paru
+  EOF
 }
 
 setup_dwm() {
+  arch-chroot /mnt sudo -i -u $username bash <<EOF
   echo -e "\e[1;35mDWM\e[0m"
   cd
   paru -S --noconfirm libxft libxinerama
   git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
   sudo make -sC ~/.local/src/dwm install
+  EOF
 }
 
 setup_dwmblocks() {
+  arch-chroot /mnt sudo -i -u $username bash <<EOF
   echo -e "\e[1;35mDWMBLOCKS\e[0m"
   git clone --depth=1 https://github.com/ghoulboii/dwmblocks.git ~/.local/src/dwmblocks
   sudo make -sC ~/.local/src/dwmblocks install
+  EOF
 }
 
 setup_st() {
+  arch-chroot /mnt sudo -i -u $username bash <<EOF
   echo -e "\e[1;35mST\e[0m"
   git clone --depth=1 https://github.com/ghoulboii/st.git ~/.local/src/st
   sudo make -sC ~/.local/src/st install
+  EOF
 }
 
 setup_dmenu() {
+  arch-chroot /mnt sudo -i -u $username bash <<EOF
   echo -e "\e[1;35mDMENU\e[0m"
   git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
   sudo make -sC ~/.local/src/dmenu install
+  EOF
 }
 
 setup_neovim() {
+  arch-chroot /mnt sudo -i -u $username bash <<EOF
   echo -e "\e[1;35mNEOVIM\e[0m"
   git clone --depth=1 https://github.com/ghoulboii/nvim.git ~/.config/nvim
   EOF
@@ -213,24 +224,25 @@ setup_neovim() {
 
 install_packages() {
   echo -e "\e[1;35mPACKAGES\e[0m"
-  arch-chroot /mnt <<EOF
-  sudo -i -u $username paru -Sy --noconfirm acpi bat btop catppuccin-gtk-theme-mocha deno easyeffects exa fd feh \
-                                          firefox fzf jdk8-openjdk jdk17-openjdk gamemode gimp gparted lf-bin \
-                                          lib32-gamemode lib32-pipewire libqalculate libreoffice-fresh \
-                                          man-db mesa \
-                                          mpv mpv-mpris ncdu neofetch neovim ttf-firacode-nerd \
-                                          newsboat noto-fonts noto-fonts-emoji npm obs-studio \
-                                          openssh os-prober pavucontrol pcmanfm-gtk3 pipewire \
-                                          pipewire-pulse playerctl prismlauncher-bin python-pywal \
-                                          qbittorrent qt6ct reflector ripgrep socat tldr tmux trash-cli \
-                                          ttf-ms-fonts ueberzug wget wine-staging winetricks wireplumber \
-                                          xbindkeys xclip xdg-desktop-portal-gtk xdotool \
-                                          xf86-input-libinput xorg-xev xorg-xinput xorg-xrandr xorg-xset \
-                                          xsel yt-dlp zathura zathura-pdf-mupdf zoxide \
-                                          zsh-autosuggestions zsh-completions \
-                                          zsh-fast-syntax-highlighting zsh-history-substring-search zstd
+  arch-chroot /mnt sudo -i -u $username bash <<EOF
+  paru -Sy --noconfirm acpi bat btop catppuccin-gtk-theme-mocha deno easyeffects exa fd feh \
+                       firefox fzf jdk8-openjdk jdk17-openjdk gamemode gimp gparted lf-bin \
+                       lib32-gamemode lib32-pipewire libqalculate libreoffice-fresh \
+                       man-db mesa \
+                       mpv mpv-mpris ncdu neofetch neovim ttf-firacode-nerd \
+                       newsboat noto-fonts noto-fonts-emoji npm obs-studio \
+                       openssh os-prober pavucontrol pcmanfm-gtk3 pipewire \
+                       pipewire-pulse playerctl prismlauncher-bin python-pywal \
+                       qbittorrent qt6ct reflector ripgrep socat tldr tmux trash-cli \
+                       ttf-ms-fonts ueberzug wget wine-staging winetricks wireplumber \
+                       xbindkeys xclip xdg-desktop-portal-gtk xdotool \
+                       xf86-input-libinput xorg-xev xorg-xinput xorg-xrandr xorg-xset \
+                       xsel yt-dlp zathura zathura-pdf-mupdf zoxide \
+                       zsh-autosuggestions zsh-completions \
+                       zsh-fast-syntax-highlighting zsh-history-substring-search zstd
   EOF
 }
+
 install_nvidia() {
   case $1 in
     1)
@@ -243,6 +255,7 @@ install_nvidia() {
       ;;
   esac
 }
+
 post_install_cleanup() {
   sed -i '$d' /mnt/etc/sudoers
   arch-chroot /mnt sudo -i -u $1 ln -sf /home/$1/.config/shell/profile /home/$1/.zprofile
@@ -281,6 +294,7 @@ main() {
       create_efi "$efi"
   esac
 
+
   clear
   echo -e "\e[1;32mPart 2: Base System\e[0m"
 
@@ -294,16 +308,16 @@ main() {
   sed -i 's/MODULES=()/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
 
 
-  echo -e "\e[1;35mPart 3: Graphical Interface\e[0m"
   clear
-
-  install_nvidia "$nvidia" "$username"
-  post_install_cleanup "$username"
-
+  echo -e "\e[1;35mPart 3: Graphical Interface\e[0m"
   echo -e "$username ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" >>/mnt/etc/sudoers
   nc=$(grep -c ^processor /proc/cpuinfo)
   sed -i "s/#MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j$nc\"/g" /mnt/etc/makepkg.conf
   sed -i "s/COMPRESSXZ=(xz -c -z -)/COMPRESSXZ=(xz -c -T $nc -z -)/g" /mnt/etc/makepkg.conf
+
+  install_nvidia "$nvidia" "$username"
+  post_install_cleanup "$username"
+
 
   for i in {5..1}; do
     echo -e "\e[1;35mREBOOTING IN $i SECONDS...\e[0m"
