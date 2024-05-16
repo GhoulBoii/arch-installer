@@ -96,7 +96,7 @@ create_efi() {
 
 install_base_pkg() {
   echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
-  pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh pacman-contrib bluez bluez-utils blueman xorg-server xorg-xinit
+  pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh pacman-contrib bluez bluez-utils blueman xorg-server xorg-xinit libxft libxinerama
   genfstab -U /mnt >>/mnt/etc/fstab
 }
 
@@ -179,8 +179,6 @@ setup_paru() {
 setup_dwm() {
   arch-chroot /mnt sudo -i -u $username bash <<EOF
   echo -e "\e[1;35mDWM\e[0m"
-  cd
-  paru -S --noconfirm libxft libxinerama
   git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
   sudo make -sC ~/.local/src/dwm install
   EOF
