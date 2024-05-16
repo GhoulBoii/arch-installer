@@ -150,70 +150,70 @@ pass_user() {
 }
 
 setup_dotfiles() {
-  arch-chroot /mnt sudo -i -u $username bash <<EOF
-  cd
   echo -e "\e[1;35mDOTFILES\e[0m"
+  arch-chroot /mnt sudo -i -u $1 bash <<EOF
+  cd
   git clone --depth=1 --separate-git-dir=.dots https://github.com/ghoulboii/dotfiles.git tmpdotfiles
   rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
   rm -rf tmpdotfiles
   /usr/bin/git --git-dir=.dots/ --work-tree=~ config --local status.showUntrackedFiles no
   mkdir ~/{dl,doc,pics}
   xdg-user-dirs-update
-  EOF
+EOF
 }
 
 setup_paru() {
-  arch-chroot /mnt sudo -i -u $username bash <<EOF
+  arch-chroot /mnt sudo -i -u $1 bash <<EOF
   echo -e "\e[1;35mPARU\e[0m"
   git clone --depth=1 https://aur.archlinux.org/paru-bin.git ~/.local/src/paru
   cd ~/.local/src/paru
   makepkg --noconfirm -rsi
   rm -rf ~/.local/src/paru
-  EOF
+EOF
 }
 
 setup_dwm() {
-  arch-chroot /mnt sudo -i -u $username bash <<EOF
+  arch-chroot /mnt sudo -i -u $1 bash <<EOF
   echo -e "\e[1;35mDWM\e[0m"
   git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
   sudo make -sC ~/.local/src/dwm install
-  EOF
+EOF
 }
 
 setup_dwmblocks() {
-  arch-chroot /mnt sudo -i -u $username bash <<EOF
+  arch-chroot /mnt sudo -i -u $1 bash <<EOF
   echo -e "\e[1;35mDWMBLOCKS\e[0m"
   git clone --depth=1 https://github.com/ghoulboii/dwmblocks.git ~/.local/src/dwmblocks
   sudo make -sC ~/.local/src/dwmblocks install
-  EOF
+EOF
 }
 
 setup_st() {
-  arch-chroot /mnt sudo -i -u $username bash <<EOF
+  arch-chroot /mnt sudo -i -u $1 bash <<EOF
   echo -e "\e[1;35mST\e[0m"
   git clone --depth=1 https://github.com/ghoulboii/st.git ~/.local/src/st
   sudo make -sC ~/.local/src/st install
-  EOF
+EOF
 }
 
 setup_dmenu() {
-  arch-chroot /mnt sudo -i -u $username bash <<EOF
+  arch-chroot /mnt sudo -i -u $1 bash <<EOF
   echo -e "\e[1;35mDMENU\e[0m"
   git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
   sudo make -sC ~/.local/src/dmenu install
-  EOF
+EOF
 }
 
 setup_neovim() {
-  arch-chroot /mnt sudo -i -u $username bash <<EOF
+  arch-chroot /mnt sudo -i -u $1 bash <<EOF
   echo -e "\e[1;35mNEOVIM\e[0m"
   git clone --depth=1 https://github.com/ghoulboii/nvim.git ~/.config/nvim
-  EOF
+EOF
 }
 
 install_packages() {
   echo -e "\e[1;35mPACKAGES\e[0m"
-  arch-chroot /mnt sudo -i -u $username bash <<EOF
+  arch-chroot /mnt sudo -i -u $1 bash <<EOF
   paru -Sy --noconfirm acpi bat btop catppuccin-gtk-theme-mocha deno easyeffects exa fd feh \
                        firefox fzf jdk8-openjdk jdk17-openjdk gamemode gimp gparted lf-bin \
                        lib32-gamemode lib32-pipewire libqalculate libreoffice-fresh \
@@ -229,7 +229,7 @@ install_packages() {
                        xsel yt-dlp zathura zathura-pdf-mupdf zoxide \
                        zsh-autosuggestions zsh-completions \
                        zsh-fast-syntax-highlighting zsh-history-substring-search zstd
-  EOF
+EOF
 }
 
 install_nvidia() {
@@ -304,6 +304,13 @@ main() {
   sed -i "s/#MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j$nc\"/g" /mnt/etc/makepkg.conf
   sed -i "s/COMPRESSXZ=(xz -c -z -)/COMPRESSXZ=(xz -c -T $nc -z -)/g" /mnt/etc/makepkg.conf
 
+  setup_dotfiles "$username"
+  setup_paru "$username"
+  setup_dwm "$username"
+  setup_dwmblocks "$username"
+  setup_st "$username"
+  setup_dmenu "$username"
+  setup_neovim "$username"
   install_nvidia "$nvidia" "$username"
   post_install_cleanup "$username"
 
