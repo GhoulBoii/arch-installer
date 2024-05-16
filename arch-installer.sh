@@ -83,12 +83,7 @@ mount_subvol() {
 
 create_swap() {
   echo -e "\e[1;36mCREATING SWAP\e[0m"
-  truncate -s 0 /mnt/swap/swapfile
-  chattr +C /mnt/swap/swapfile
-  dd if=/dev/zero of=/mnt/swap/swapfile bs=1M count=2048
-  chmod 600 /mnt/swap/swapfile
-  chown root /mnt/swap/swapfile
-  mkswap /mnt/swap/swapfile
+  btrfs filesystem mkswapfile --size 2G /mnt/swap/swapfile
   swapon /mnt/swap/swapfile
 }
 
