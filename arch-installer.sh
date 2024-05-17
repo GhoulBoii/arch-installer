@@ -90,7 +90,7 @@ create_swap() {
 create_efi() {
   echo -e "\e[1;36mCREATING UEFI PARTITION\e[0m"
   mkfs.fat -F 32 $1
-  mdkir /mnt/boot
+  mkdir /mnt/boot
   mount $1 /mnt/boot
 }
 
@@ -274,8 +274,8 @@ main() {
   reflector -c $(curl https://ifconfig.co/country-iso) --sort rate -a 24 -f 5 -p https --save /etc/pacman.d/mirrorlist
   timedatectl set-ntp true
 
-  create_subvol "$drive"
-  mount_subvol "$drive"
+  create_subvol "$linux"
+  mount_subvol "$linux"
   create_swap
 
   case $efi in
