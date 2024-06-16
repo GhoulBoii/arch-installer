@@ -409,15 +409,15 @@ EOF
   echo -e "${blue}Ksh's Arch Installer${normal}"
   echo -e "${blue}Script will take ~15-30 min to install so sit back and enjoy a cup of coffee :)${normal}"
   echo -e "${blue}Part 1: Partition Setup${normal}"
-  drive=$(input_drive)
-  linux=$(input_linux_part)
+  local drive=$(input_drive)
+  local linux=$(input_linux_part)
   if [[ -d "/sys/firmware/efi" ]]; then
-    efi=$(input_efi_part)
+    local efi=$(input_efi_part)
   fi
-  hostname=$(input_host)
-  username=$(input_user)
-  pass=$(input_pass)
-  nvidia=$(input_nvidia)
+  local hostname=$(input_host)
+  local username=$(input_user)
+  local pass=$(input_pass)
+  local nvidia=$(input_nvidia)
 
   sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /etc/pacman.conf
   pacman --noconfirm -Sy archlinux-keyring
