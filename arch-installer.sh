@@ -106,7 +106,33 @@ create_efi() {
 
 install_base_pkg() {
   echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
-  pacstrap /mnt base base-devel linux-zen linux-zen-headers linux-firmware btrfs-progs intel-ucode grub networkmanager git libvirt reflector rsync xdg-user-dirs xdg-utils zsh pacman-contrib bluez bluez-utils blueman xorg-server xorg-xinit libxft libxinerama
+  local packages=(
+    base
+    base-devel
+    linux-zen
+    linux-zen-headers
+    linux-firmware
+    btrfs-progs
+    intel-ucode
+    grub
+    networkmanager
+    git
+    libvirt
+    reflector
+    rsync
+    xdg-user-dirs
+    xdg-utils
+    zsh
+    bluez
+    bluez-utils
+    blueman
+    xorg-server
+    xorg-xinit
+    libxft
+    libxinerama
+    ufw
+  )
+  pacstrap /mnt "${packages[@]}"
   genfstab -U /mnt >>/mnt/etc/fstab
 }
 
@@ -234,26 +260,86 @@ setup_neovim() {
   git clone --depth=1 https://github.com/ghoulboii/nvim.git ~/.config/nvim
 EOF
 }
-
 install_packages() {
-  echo -e "\e[1;35mPACKAGES\e[0m"
-  arch-chroot /mnt sudo -i -u $1 bash <<EOF
-  paru -Sy --noconfirm acpi bat btop catppuccin-gtk-theme-mocha deno easyeffects exa fd feh \
-                       firefox fzf jdk8-openjdk jdk17-openjdk gamemode gimp gparted lf-bin \
-                       lib32-gamemode lib32-pipewire libqalculate libreoffice-fresh \
-                       man-db mesa \
-                       mpv mpv-mpris ncdu neofetch neovim ttf-firacode-nerd \
-                       newsboat noto-fonts noto-fonts-emoji npm obs-studio \
-                       openssh os-prober pavucontrol pcmanfm-gtk3 pipewire \
-                       pipewire-pulse playerctl prismlauncher-bin python-pywal \
-                       qbittorrent qt6ct reflector ripgrep socat tldr tmux trash-cli \
-                       ttf-ms-fonts ueberzug wget wine-staging winetricks wireplumber \
-                       xbindkeys xclip xdg-desktop-portal-gtk xdotool \
-                       xf86-input-libinput xorg-xev xorg-xinput xorg-xrandr xorg-xset \
-                       xsel yt-dlp zathura zathura-pdf-mupdf zoxide \
-                       zsh-autosuggestions zsh-completions \
-                       zsh-fast-syntax-highlighting zsh-history-substring-search zstd
-EOF
+  local username="$1"
+  echo -e "\\e[1;35mPACKAGES\\e[0m"
+  # FIX: Add a new gtk theme, need more testing
+  local packages=(
+    acpi
+    bat
+    btop
+    deno
+    easyeffects
+    exa
+    fastfetch
+    fd
+    feh
+    firefox
+    fzf
+    jdk8-openjdk
+    jdk17-openjdk
+    gamemode
+    gimp
+    gparted
+    lf
+    libqalculate
+    man-db
+    mesa
+    mpv
+    mpv-mpris
+    ncdu
+    neovim
+    newsboat
+    noto-fonts
+    noto-fonts-emoji
+    npm
+    obs-studio
+    openssh
+    os-prober
+    pavucontrol
+    pacman-contrib
+    pcmanfm-gtk3
+    pipewire
+    pipewire-pulse
+    playerctl
+    prismlauncher-bin
+    python-pywal
+    qbittorrent
+    qt6ct
+    reflector
+    ripgrep
+    socat
+    tldr
+    tmux
+    trash-cli
+    ttf-firacode-nerd
+    ttf-ms-fonts
+    ueberzugpp
+    wget
+    wine-staging
+    winetricks
+    wireplumber
+    xbindkeys
+    xclip
+    xdg-desktop-portal-gtk
+    xdotool
+    xf86-input-libinput
+    xorg-xev
+    xorg-xinput
+    xorg-xrandr
+    xorg-xset
+    xsel
+    yt-dlp
+    zathura
+    zathura-pdf-mupdf
+    zoxide
+    zsh-autosuggestions
+    zsh-completions
+    zsh-fast-syntax-highlighting
+    zsh-history-substring-search
+    zstd
+  )
+  arch-chroot /mnt sudo -i -u "$username" paru -Sy --noconfirm --needed "${packages[@]}"
 }
 
 install_nvidia() {
