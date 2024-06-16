@@ -279,12 +279,29 @@ post_install_cleanup() {
 }
 
 
-
-
-
 main() {
   clear
-  echo -e "\e[1;32mGhoulBoi's Arch Installer\e[0m"
+  cat <<"EOF"
+         _nnnn_
+        dGGGGMMb     ,""""""""""""""""".
+       @p~qp~~qMb    | i use arch btw! |
+       M|@||@) M|   _;.................'
+       @,----.JM| -'
+      JS^\__/  qKL
+     dZP        qKRb
+    dZP          qKKb
+   fZP            SMMb
+   HZM            MMMM
+   FqM            MMMM
+ __| ".        |\dS"qML
+ |    `.       | `' \Zq
+_)      \.___.,|     .'
+\____   )MMMMMM|   .'
+     `-'       `--'
+EOF
+
+  echo -e "\e[1;32mKsh's Arch Installer\e[0m"
+  echo -e "\e[1;32mScript will take ~15-30 min to install so sit back and enjoy a cup of coffee :)\e[0m"
   echo -e "\e[1;32mPart 1: Partition Setup\e[0m"
   drive=$(input_drive)
   linux=$(input_linux_part)
@@ -301,6 +318,7 @@ main() {
   reflector -c $(curl https://ifconfig.co/country-iso) --sort rate -a 24 -f 5 -p https --save /etc/pacman.d/mirrorlist
   timedatectl set-ntp true
 
+  umount -A --recursive /mnt
   create_subvol "$linux"
   mount_subvol "$linux"
   create_swap
@@ -311,6 +329,11 @@ main() {
   esac
 
 
+  echo -ne "\e[1;32mSuccessful! Moving to Part 2\e[0m"
+  for i in {1..5}; do
+    echo -n .
+    sleep 1
+  done
   clear
   echo -e "\e[1;32mPart 2: Base System\e[0m"
 
@@ -321,11 +344,16 @@ main() {
   create_user "$username"
   pass_root "$pass"
   pass_user "$username" "$pass"
-  sed -i 's/MODULES=()/MODULES=(btrfs)/' /mnt/etc/mkinitcpio.conf
 
 
+  echo -ne "\e[1;32mSuccessful! Moving to Part 3\e[0m"
+  for i in {1..5}; do
+    echo -n .
+    sleep 1
+  done
   clear
   echo -e "\e[1;35mPart 3: Graphical Interface\e[0m"
+
   echo -e "$username ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" >>/mnt/etc/sudoers
   nc=$(grep -c ^processor /proc/cpuinfo)
   sed -i "s/#MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j$nc\"/g" /mnt/etc/makepkg.conf
@@ -343,12 +371,6 @@ main() {
   install_nvidia "$nvidia" "$username"
   post_install_cleanup "$username"
 
-
-  for i in {5..1}; do
-    echo -e "\e[1;35mREBOOTING IN $i SECONDS...\e[0m"
-    sleep 1
-  done
-  echo -e "\e[1;35mSCRIPT FINISHED! REBOOTING NOW...\e[0m"
-  reboot
+  echo -e "\e[1;35mScript finished without errors! Reboot now and enjoy \\( ﾟヮﾟ)/\e[0m"
 }
 main "$@"
