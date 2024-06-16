@@ -221,6 +221,7 @@ setup_dotfiles() {
   /usr/bin/git --git-dir=.dots/ --work-tree=~ config --local status.showUntrackedFiles no
   mkdir ~/{dl,doc,pics}
   xdg-user-dirs-update
+  echo 'ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"' > /etc/zsh/zshenv
 EOF
 }
 
@@ -278,6 +279,7 @@ setup_neovim() {
   git clone --depth=1 https://github.com/ghoulboii/nvim.git ~/.config/nvim
 EOF
 }
+
 install_packages() {
   local username="$1"
   echo -e "\${blue}PACKAGES\${normal}"
