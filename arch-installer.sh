@@ -181,7 +181,7 @@ install_grub() {
 create_user() {
   local username="$1"
   echo -e "${green}USER CREATION${normal}"
-  arch-chroot /mnt systemctl enable NetworkManager libvirtd paccache.timer bluetooth
+  arch-chroot /mnt systemctl enable NetworkManager libvirtd paccache.timer bluetooth ufw.service
   arch-chroot /mnt useradd -mG wheel -s /bin/zsh username
   arch-chroot /mnt usermod -aG libvirt username
 }
@@ -195,6 +195,19 @@ pass_user() {
   local username="$1"
   local pass="$2"
   arch-chroot /mnt bash -c "echo $username:$pass | chpasswd"
+}
+
+setup_ufw() {
+  arch-chroot /mnt <<EOF
+  ufw enable
+  ufw logging off
+  ufw default deny
+  ufw allow from 192.168.0.0/24
+  ufw allow 443
+  ufw allow 80
+  ufw limit 22
+  ufw limit ssh
+EOF
 }
 
 setup_dotfiles() {
@@ -435,6 +448,7 @@ EOF
   create_user "$username"
   pass_root "$pass"
   pass_user "$username" "$pass"
+  setup_ufw
 
 
   echo -ne "${green}Successful! Moving to Part 3${normal}"
