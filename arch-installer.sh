@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+blue=$(tput setaf 6)
+normal=$(tput sgr0)
+
 input_drive() {
   local drive
   lsblk >&2
@@ -28,7 +33,7 @@ input_host() {
     if [[ "${hostname}" =~ ^[a-z][a-z0-9_.-]{0,62}[a-z0-9]$ ]]; then
       break
     fi
-    echo -e "\e[1;31mIncorrect Hostname!\e[0m" >&2
+    echo -e "${red}Incorrect Hostname!${normal}" >&2
   done
   echo "$hostname"
 }
@@ -40,7 +45,7 @@ input_user() {
     if [[ "${username}" =~ ^[a-z_]([a-z0-9_-]{0,31}|[a-z0-9_-]{0,30}\$)$ ]]; then
       break
     fi
-    echo -e "\e[1;31mIncorrect Username!\e[0m" >&2
+    echo -e "${red}Incorrect Username!${normal}" >&2
   done
   echo "$username"
 }
@@ -54,7 +59,7 @@ input_pass() {
     if [[ "${pass1}" = "${pass2}" ]]; then
       break
     fi
-    echo -e "\n\e[1;31mPasswords don't match.\e[0m" >&2
+    echo -e "\n${red}Passwords don't match.${normal}" >&2
   done
   echo "$pass1"
 }
@@ -68,7 +73,7 @@ input_nvidia() {
 
 create_subvol() {
   local drive="$1"
-  echo -e "\e[1;36mCREATING SUBVOLUMES\e[0m"
+  echo -e "${cyan}CREATING SUBVOLUMES${normal}"
   mkfs.btrfs -fL Linux "$drive"
   mount "$drive" /mnt
   btrfs subvolume create /mnt/@
@@ -81,7 +86,7 @@ create_subvol() {
 
 mount_subvol() {
   local drive="$1"
-  echo -e "\e[1;36mMOUNTING SUBVOLUMES\e[0m"
+  echo -e "${cyan}MOUNTING SUBVOLUMES${normal}"
   mount -o noatime,discard=async,compress=zstd:2,subvol=@ "$drive" /mnt
   mkdir /mnt/{home,swap,var,tmp}
   mount -o noatime,compress=zstd:2,subvol=@home "$drive" /mnt/home
@@ -91,21 +96,21 @@ mount_subvol() {
 }
 
 create_swap() {
-  echo -e "\e[1;36mCREATING SWAP\e[0m"
+  echo -e "${cyan}CREATING SWAP${normal}"
   btrfs filesystem mkswapfile --size 2G /mnt/swap/swapfile
   swapon /mnt/swap/swapfile
 }
 
 create_efi() {
   local efi="$1"
-  echo -e "\e[1;36mCREATING UEFI PARTITION\e[0m"
+  echo -e "${cyan}CREATING UEFI PARTITION${normal}"
   mkfs.fat -F 32 "$efi"
   mkdir /mnt/boot
   mount "$efi" /mnt/boot
 }
 
 install_base_pkg() {
-  echo -e "\e[1;36mINSTALLING BASIC PACKAGES\e[0m"
+  echo -e "${cyan}INSTALLING BASIC PACKAGES${normal}"
   local packages=(
     base
     base-devel
@@ -137,7 +142,7 @@ install_base_pkg() {
 }
 
 conf_pacman() {
-  echo -e "\e[1;32\PACMAN CONFIG\e[0m"
+  echo -e "${green}PACMAN CONFIG${normal}"
   sed -i "s/^#ParallelDownloads = 5$/ParallelDownloads = 10/" /mnt/etc/pacman.conf
   grep -q "ILoveCandy" /mnt/etc/pacman.conf || sed -i "/#VerbosePkgLists/a ILoveCandy" /mnt/etc/pacman.conf
   sed -i "/^#ParallelDownloads/s/=.*/= 5/;s/^#Color$/Color/" /mnt/etc/pacman.conf
@@ -160,7 +165,7 @@ conf_locale_hosts() {
 install_grub() {
   local efi="$1"
   local drive="$2"
-  echo -e "\e[1;32mGRUB\e[0m"
+  echo -e "${green}GRUB${normal}"
   case "$efi" in
     /dev/*)
       arch-chroot /mnt pacman -Sy --noconfirm efibootmgr
@@ -175,7 +180,7 @@ install_grub() {
 
 create_user() {
   local username="$1"
-  echo -e "\e[1;32mUSER CREATION\e[0m"
+  echo -e "${green}USER CREATION${normal}"
   arch-chroot /mnt systemctl enable NetworkManager libvirtd paccache.timer bluetooth
   arch-chroot /mnt useradd -mG wheel -s /bin/zsh username
   arch-chroot /mnt usermod -aG libvirt username
@@ -194,7 +199,7 @@ pass_user() {
 
 setup_dotfiles() {
   local username="$1"
-  echo -e "\e[1;35mDOTFILES\e[0m"
+  echo -e "${blue}DOTFILES${normal}"
   arch-chroot /mnt sudo -i -u $username bash <<EOF
   cd
   git clone --depth=1 --separate-git-dir=.dots https://github.com/ghoulboii/dotfiles.git tmpdotfiles
@@ -209,7 +214,7 @@ EOF
 setup_paru() {
   local username="$1"
   arch-chroot /mnt sudo -i -u "$username" bash <<EOF
-  echo -e "\e[1;35mPARU\e[0m"
+  echo -e "${blue}PARU${normal}"
   git clone --depth=1 https://aur.archlinux.org/paru-bin.git ~/.local/src/paru
   cd ~/.local/src/paru
   makepkg --noconfirm -rsi
@@ -220,7 +225,7 @@ EOF
 setup_dwm() {
   local username="$1"
   arch-chroot /mnt sudo -i -u "$username" bash <<EOF
-  echo -e "\e[1;35mDWM\e[0m"
+  echo -e "${blue}DWM${normal}"
   git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
   sudo make -sC ~/.local/src/dwm install
 EOF
@@ -229,7 +234,7 @@ EOF
 setup_dwmblocks() {
   local username="$1"
   arch-chroot /mnt sudo -i -u "$username" bash <<EOF
-  echo -e "\e[1;35mDWMBLOCKS\e[0m"
+  echo -e "${blue}DWMBLOCKS${normal}"
   git clone --depth=1 https://github.com/ghoulboii/dwmblocks.git ~/.local/src/dwmblocks
   sudo make -sC ~/.local/src/dwmblocks install
 EOF
@@ -238,7 +243,7 @@ EOF
 setup_st() {
   local username="$1"
   arch-chroot /mnt sudo -i -u "$username" bash <<EOF
-  echo -e "\e[1;35mST\e[0m"
+  echo -e "${blue}ST${normal}"
   git clone --depth=1 https://github.com/ghoulboii/st.git ~/.local/src/st
   sudo make -sC ~/.local/src/st install
 EOF
@@ -247,7 +252,7 @@ EOF
 setup_dmenu() {
   local username="$1"
   arch-chroot /mnt sudo -i -u "$username" bash <<EOF
-  echo -e "\e[1;35mDMENU\e[0m"
+  echo -e "${blue}DMENU${normal}"
   git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
   sudo make -sC ~/.local/src/dmenu install
 EOF
@@ -256,13 +261,13 @@ EOF
 setup_neovim() {
   local username="$1"
   arch-chroot /mnt sudo -i -u "$username" bash <<EOF
-  echo -e "\e[1;35mNEOVIM\e[0m"
+  echo -e "${blue}NEOVIM${normal}"
   git clone --depth=1 https://github.com/ghoulboii/nvim.git ~/.config/nvim
 EOF
 }
 install_packages() {
   local username="$1"
-  echo -e "\\e[1;35mPACKAGES\\e[0m"
+  echo -e "\${blue}PACKAGES\${normal}"
   # FIX: Add a new gtk theme, need more testing
   local packages=(
     acpi
@@ -347,11 +352,11 @@ install_nvidia() {
   local username="$2"
   case "$nvidia" in
     1)
-      echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
+      echo -e "${blue}NVIDIA DRIVERS${normal}"
       arch-chroot /mnt sudo -i -u "$username" paru -S --noconfirm nvidia-dkms nvidia-utils lib32-nvidia-utils
       ;;
     2)
-      echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
+      echo -e "${blue}NVIDIA DRIVERS${normal}"
       arch-chroot /mnt sudo -i -u "$username" paru -S --noconfirm nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
       ;;
   esac
@@ -386,9 +391,9 @@ _)      \.___.,|     .'
      `-'       `--'
 EOF
 
-  echo -e "\e[1;32mKsh's Arch Installer\e[0m"
-  echo -e "\e[1;32mScript will take ~15-30 min to install so sit back and enjoy a cup of coffee :)\e[0m"
-  echo -e "\e[1;32mPart 1: Partition Setup\e[0m"
+  echo -e "${blue}Ksh's Arch Installer${normal}"
+  echo -e "${blue}Script will take ~15-30 min to install so sit back and enjoy a cup of coffee :)${normal}"
+  echo -e "${blue}Part 1: Partition Setup${normal}"
   drive=$(input_drive)
   linux=$(input_linux_part)
   if [[ -d "/sys/firmware/efi" ]]; then
@@ -415,13 +420,13 @@ EOF
   esac
 
 
-  echo -ne "\e[1;32mSuccessful! Moving to Part 2\e[0m"
+  echo -ne "${green}Successful! Moving to Part 2${normal}"
   for i in {1..5}; do
     echo -n .
     sleep 1
   done
   clear
-  echo -e "\e[1;32mPart 2: Base System\e[0m"
+  echo -e "${blue}Part 2: Base System${normal}"
 
   install_base_pkg
   conf_pacman
@@ -432,13 +437,13 @@ EOF
   pass_user "$username" "$pass"
 
 
-  echo -ne "\e[1;32mSuccessful! Moving to Part 3\e[0m"
+  echo -ne "${green}Successful! Moving to Part 3${normal}"
   for i in {1..5}; do
     echo -n .
     sleep 1
   done
   clear
-  echo -e "\e[1;35mPart 3: Graphical Interface\e[0m"
+  echo -e "${blue}Part 3: Graphical Interface${normal}"
 
   echo -e "$username ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" >>/mnt/etc/sudoers
   nc=$(grep -c ^processor /proc/cpuinfo)
@@ -457,6 +462,6 @@ EOF
   install_nvidia "$nvidia" "$username"
   post_install_cleanup "$username"
 
-  echo -e "\e[1;35mScript finished without errors! Reboot now and enjoy \\( ﾟヮﾟ)/\e[0m"
+  echo -e "${green}Script finished without errors! Reboot now and enjoy ^_^${normal}"
 }
 main "$@"
