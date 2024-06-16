@@ -67,9 +67,10 @@ input_nvidia() {
 }
 
 create_subvol() {
+  local drive="$1"
   echo -e "\e[1;36mCREATING SUBVOLUMES\e[0m"
-  mkfs.btrfs -fL Linux $1
-  mount $1 /mnt
+  mkfs.btrfs -fL Linux "$drive"
+  mount "$drive" /mnt
   btrfs subvolume create /mnt/@
   btrfs subvolume create /mnt/@home
   btrfs subvolume create /mnt/@swap
@@ -79,13 +80,14 @@ create_subvol() {
 }
 
 mount_subvol() {
+  local drive="$1"
   echo -e "\e[1;36mMOUNTING SUBVOLUMES\e[0m"
-  mount -o noatime,discard=async,compress=zstd:2,subvol=@ $1 /mnt
+  mount -o noatime,discard=async,compress=zstd:2,subvol=@ "$drive" /mnt
   mkdir /mnt/{home,swap,var,tmp}
-  mount -o noatime,compress=zstd:2,subvol=@home $1 /mnt/home
-  mount -o nodatacow,subvol=@swap $1 /mnt/swap
-  mount -o nodatacow,subvol=@var $1 /mnt/var
-  mount -o noatime,compress=zstd:2,subvol=@tmp $1 /mnt/tmp
+  mount -o noatime,compress=zstd:2,subvol=@home "$drive" /mnt/home
+  mount -o nodatacow,subvol=@swap "$drive" /mnt/swap
+  mount -o nodatacow,subvol=@var "$drive" /mnt/var
+  mount -o noatime,compress=zstd:2,subvol=@tmp "$drive" /mnt/tmp
 }
 
 create_swap() {
@@ -95,10 +97,11 @@ create_swap() {
 }
 
 create_efi() {
+  local efi="$1"
   echo -e "\e[1;36mCREATING UEFI PARTITION\e[0m"
-  mkfs.fat -F 32 $1
+  mkfs.fat -F 32 "$efi"
   mkdir /mnt/boot
-  mount $1 /mnt/boot
+  mount "$efi" /mnt/boot
 }
 
 install_base_pkg() {
@@ -116,49 +119,57 @@ conf_pacman() {
 }
 
 conf_locale_hosts() {
+  local hostname="$1"
   arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
   arch-chroot /mnt hwclock --systohc
   echo "en_US.UTF-8 UTF-8" >>/mnt/etc/locale.gen
   arch-chroot /mnt locale-gen
   echo "LANG=en_US.UTF-8" >>/mnt/etc/locale.conf
-  echo $hostname >/mnt/etc/hostname
+  echo "$hostname" >/mnt/etc/hostname
   echo "127.0.0.1 localhost" >>/mnt/etc/hosts
   echo "::1       localhost" >>/mnt/etc/hosts
   echo "127.0.1.1 $hostname.localdomain $hostname" >>/mnt/etc/hosts
 }
 
 install_grub() {
+  local efi="$1"
+  local drive="$2"
   echo -e "\e[1;32mGRUB\e[0m"
-  case $1 in
+  case "$efi" in
     /dev/*)
       arch-chroot /mnt pacman -Sy --noconfirm efibootmgr
       arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
       ;;
     *)
-      arch-chroot /mnt grub-install --target=i386-pc $2
+      arch-chroot /mnt grub-install --target=i386-pc $drive
       ;;
   esac
   arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 }
 
 create_user() {
+  local username="$1"
   echo -e "\e[1;32mUSER CREATION\e[0m"
   arch-chroot /mnt systemctl enable NetworkManager libvirtd paccache.timer bluetooth
-  arch-chroot /mnt useradd -mG wheel -s /bin/zsh $1
-  arch-chroot /mnt usermod -aG libvirt $1
+  arch-chroot /mnt useradd -mG wheel -s /bin/zsh username
+  arch-chroot /mnt usermod -aG libvirt username
 }
 
 pass_root() {
-  arch-chroot /mnt bash -c "echo root:$1 | chpasswd"
+  local pass="$1"
+  arch-chroot /mnt bash -c "echo root:$pass | chpasswd"
 }
 
 pass_user() {
-  arch-chroot /mnt bash -c "echo "$1:$2" | chpasswd"
+  local username="$1"
+  local pass="$2"
+  arch-chroot /mnt bash -c "echo $username:$pass | chpasswd"
 }
 
 setup_dotfiles() {
+  local username="$1"
   echo -e "\e[1;35mDOTFILES\e[0m"
-  arch-chroot /mnt sudo -i -u $1 bash <<EOF
+  arch-chroot /mnt sudo -i -u $username bash <<EOF
   cd
   git clone --depth=1 --separate-git-dir=.dots https://github.com/ghoulboii/dotfiles.git tmpdotfiles
   rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
@@ -170,7 +181,8 @@ EOF
 }
 
 setup_paru() {
-  arch-chroot /mnt sudo -i -u $1 bash <<EOF
+  local username="$1"
+  arch-chroot /mnt sudo -i -u "$username" bash <<EOF
   echo -e "\e[1;35mPARU\e[0m"
   git clone --depth=1 https://aur.archlinux.org/paru-bin.git ~/.local/src/paru
   cd ~/.local/src/paru
@@ -180,7 +192,8 @@ EOF
 }
 
 setup_dwm() {
-  arch-chroot /mnt sudo -i -u $1 bash <<EOF
+  local username="$1"
+  arch-chroot /mnt sudo -i -u "$username" bash <<EOF
   echo -e "\e[1;35mDWM\e[0m"
   git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
   sudo make -sC ~/.local/src/dwm install
@@ -188,7 +201,8 @@ EOF
 }
 
 setup_dwmblocks() {
-  arch-chroot /mnt sudo -i -u $1 bash <<EOF
+  local username="$1"
+  arch-chroot /mnt sudo -i -u "$username" bash <<EOF
   echo -e "\e[1;35mDWMBLOCKS\e[0m"
   git clone --depth=1 https://github.com/ghoulboii/dwmblocks.git ~/.local/src/dwmblocks
   sudo make -sC ~/.local/src/dwmblocks install
@@ -196,7 +210,8 @@ EOF
 }
 
 setup_st() {
-  arch-chroot /mnt sudo -i -u $1 bash <<EOF
+  local username="$1"
+  arch-chroot /mnt sudo -i -u "$username" bash <<EOF
   echo -e "\e[1;35mST\e[0m"
   git clone --depth=1 https://github.com/ghoulboii/st.git ~/.local/src/st
   sudo make -sC ~/.local/src/st install
@@ -204,7 +219,8 @@ EOF
 }
 
 setup_dmenu() {
-  arch-chroot /mnt sudo -i -u $1 bash <<EOF
+  local username="$1"
+  arch-chroot /mnt sudo -i -u "$username" bash <<EOF
   echo -e "\e[1;35mDMENU\e[0m"
   git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
   sudo make -sC ~/.local/src/dmenu install
@@ -212,7 +228,8 @@ EOF
 }
 
 setup_neovim() {
-  arch-chroot /mnt sudo -i -u $1 bash <<EOF
+  local username="$1"
+  arch-chroot /mnt sudo -i -u "$username" bash <<EOF
   echo -e "\e[1;35mNEOVIM\e[0m"
   git clone --depth=1 https://github.com/ghoulboii/nvim.git ~/.config/nvim
 EOF
@@ -240,22 +257,25 @@ EOF
 }
 
 install_nvidia() {
-  case $1 in
+  local nvidia="$1"
+  local username="$2"
+  case "$nvidia" in
     1)
       echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
-      arch-chroot /mnt sudo -i -u $2 paru -S --noconfirm nvidia-dkms nvidia-utils lib32-nvidia-utils
+      arch-chroot /mnt sudo -i -u "$username" paru -S --noconfirm nvidia-dkms nvidia-utils lib32-nvidia-utils
       ;;
     2)
       echo -e "\e[1;35mNVIDIA DRIVERS\e[0m"
-      arch-chroot /mnt sudo -i -u $2 paru -S --noconfirm nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
+      arch-chroot /mnt sudo -i -u "$username" paru -S --noconfirm nvidia-390xx-dkms nvidia-390xx-utils lib32-nvidia-390xx-utils
       ;;
   esac
 }
 
 post_install_cleanup() {
+  local username="$1"
   sed -i '$d' /mnt/etc/sudoers
-  arch-chroot /mnt sudo -i -u $1 ln -sf /home/$1/.config/shell/profile /home/$1/.zprofile
-  rm -rf /mnt/home/$1/.bash*
+  arch-chroot /mnt sudo -i -u "$username" ln -sf /home/"$username"/.config/shell/profile /home/"$username"/.zprofile
+  rm -rf /mnt/home/"$username"/.bash*
 }
 
 
@@ -296,7 +316,7 @@ main() {
 
   install_base_pkg
   conf_pacman
-  conf_locale_hosts
+  conf_locale_hosts "$hostname"
   install_grub "$efi" "$drive"
   create_user "$username"
   pass_root "$pass"
