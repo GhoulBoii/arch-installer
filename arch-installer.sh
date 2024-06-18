@@ -284,6 +284,9 @@ install_packages() {
   local username="$1"
   echo -e "\${blue}PACKAGES\${normal}"
   # FIX: Add a new gtk theme, need more testing
+  # package_array=($(echo "$packages"))
+  #
+  # paru -S "${package_array[@]}"
   local packages=(
     acpi
     bat
@@ -328,6 +331,7 @@ install_packages() {
     qt6ct
     reflector
     ripgrep
+    rose-pine-gtk-theme
     socat
     tldr
     tmux
