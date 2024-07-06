@@ -385,7 +385,6 @@ install_nvidia() {
 post_install_cleanup() {
   local username="$1"
   sed -i '$d' /mnt/etc/sudoers
-  arch-chroot /mnt sudo -i -u "$username" ln -sf /home/"$username"/.config/shell/profile /home/"$username"/.zprofile
   rm -rf /mnt/home/"$username"/.bash*
 }
 
