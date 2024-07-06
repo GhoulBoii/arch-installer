@@ -328,7 +328,8 @@ install_packages() {
     prismlauncher-bin
     python-pywal
     qbittorrent
-    qt6ct
+    qt5-styleplugins
+    qt6gtk2
     reflector
     ripgrep
     rose-pine-gtk-theme
