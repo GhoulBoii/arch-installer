@@ -290,6 +290,9 @@ install_packages() {
   local username="$1"
   echo -e "\${blue}PACKAGES\${normal}"
   # FIX: Add a new gtk theme, need more testing
+  # package_array=($(echo "$packages"))
+  #
+  # paru -S "${package_array[@]}"
   local packages=(
     acpi
     bat
@@ -331,9 +334,11 @@ install_packages() {
     prismlauncher-bin
     python-pywal
     qbittorrent
-    qt6ct
+    qt5-styleplugins
+    qt6gtk2
     reflector
     ripgrep
+    rose-pine-gtk-theme
     socat
     tldr
     tmux
@@ -386,7 +391,6 @@ install_nvidia() {
 post_install_cleanup() {
   local username="$1"
   sed -i '$d' /mnt/etc/sudoers
-  arch-chroot /mnt sudo -i -u "$username" ln -sf /home/"$username"/.config/shell/profile /home/"$username"/.zprofile
   rm -rf /mnt/home/"$username"/.bash*
 }
 
