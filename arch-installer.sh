@@ -67,7 +67,7 @@ input_pass() {
 input_nvidia() {
   local nvidia
   echo -e "\nAmd and Intel Drivers will automatically work with the mesa package. The option below is only for Nvidia Graphics Card users." >&2
-  read -p "Enter which graphics driver you use (Enter \"1\" for Nvidia or \"2\" for Legacy Nvidia Drivers (Driver 390): " nvidia
+  read -p "Enter which graphics driver you use [Enter \"1\" for Nvidia or \"2\" for Legacy Nvidia Drivers (Driver 390)]: " nvidia
   echo "$nvidia"
 }
 
@@ -339,7 +339,10 @@ install_packages() {
     trash-cli
     ttf-firacode-nerd
     ttf-ms-fonts
+    unclutter
+    udiskie
     ueberzugpp
+    webkit2gtk
     wget
     wine-staging
     winetricks
@@ -411,7 +414,7 @@ _)      \.___.,|     .'
 EOF
 
   echo -e "${blue}Ksh's Arch Installer${normal}"
-  echo -e "${blue}Script will take ~15-30 min to install so sit back and enjoy a cup of coffee :)${normal}"
+  echo -e "${blue}Script will take 15-30 min to run so sit back and enjoy a cup of coffee :)${normal}"
   echo -e "${blue}Part 1: Partition Setup${normal}"
   local drive=$(input_drive)
   local linux=$(input_linux_part)
