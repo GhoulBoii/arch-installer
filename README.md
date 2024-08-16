@@ -1,27 +1,31 @@
-# Arch Installer 
+<h1 align="center">Arch Installer</h1>
+<h3 align="center">Quick & Simple Arch Linux Installer</h3>
 
-Automated Arch Linux Installer for Different Scenarios and Scemes.
+## ✨ Features
 
-## Features
+- Partitions the drive with support of UEFI & BIOS
+- Installs necessary packages (bluetooth, audio, firewall)
+- Rices with [my dotfiles](https://github.com/GhoulBoii/dotfiles)
+- Setup a working environment in less than **30 minutes**
 
-- Setup a working environment in less than 30 minutes
-- Uses dwm (window manager), st (terminal emulator) and dmenu (application switcher)
+## 🔧 Usage
 
-## Usage
-
-Get the latest archlinux [ISO](https://archlinux.org/download/) and flash it on a usb with [Ventoy](https://github.com/ventoy/Ventoy) (Recommended) or [Balena Etcher](https://github.com/balena-io/etcher). Then run the following commands when you boot into the live environment:
-```
-pacman -Sy git
+- Grab the latest [Arch Linux ISO](https://archlinux.org/download/)
+- Flash it on a USB Drive using [Ventoy](https://github.com/ventoy/Ventoy) [**Recommended**] or [Balena Etcher](https://github.com/balena-io/etcher)
+- Boot into the live environment and run the following commands:
+```bash
+pacman -Sy --noconfirm archlinux-keyring
+pacman -S --noconfirm git
 git clone https://github.com/ghoulboii/arch-installer
 cd arch-installer
 ./arch-installer.sh
 ```
 
-## License 
+## 📜 License
 
-This project is licensed under the GPL-3.0 License - see the [License file](LICENSE) for details.
+This project is licensed under the GPL-3.0 License - see the [License file](LICENSE.md) for details.
 
-## Credits to:
+## ❤️ Credits
 
 - [Bugswriter](https://github.com/Bugswriter/arch-linux-magic)
 - [Chris Titus Tech](https://github.com/ChrisTitusTech/ArchTitus)
