@@ -215,10 +215,11 @@ setup_dotfiles() {
   echo -e "${blue}DOTFILES${normal}"
   arch-chroot /mnt sudo -i -u $username bash <<EOF
   cd
-  git clone --depth=1 --separate-git-dir=.dots https://github.com/ghoulboii/dotfiles.git tmpdotfiles
+  git clone --depth=1 --separate-git-dir=.dots https://github.com/ghoulboii/dotfiles tmpdotfiles
+  git --git-dir=.dots --work-tree=~ remote set-url origin git@github.com:$(whoami)/dotfiles
+  git --git-dir=.dots --work-tree=~ config --local status.showUntrackedFiles no
   rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
   rm -rf tmpdotfiles
-  /usr/bin/git --git-dir=.dots/ --work-tree=~ config --local status.showUntrackedFiles no
   mkdir ~/{dl,doc,pics}
   xdg-user-dirs-update
   echo 'ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"' > /etc/zsh/zshenv
@@ -240,7 +241,8 @@ setup_dwm() {
   local username="$1"
   arch-chroot /mnt sudo -i -u "$username" bash <<EOF
   echo -e "${blue}DWM${normal}"
-  git clone --depth=1 https://github.com/ghoulboii/dwm.git ~/.local/src/dwm
+  git clone --depth=1 https://github.com/ghoulboii/dwm ~/.local/src/dwm
+  git --git-dir=~/.local/src/dwm/.git --work-tree=~/.local/dwm/st remote set-url origin git@github.com:$(whoami)/dwm
   sudo make -sC ~/.local/src/dwm install
 EOF
 }
@@ -249,7 +251,8 @@ setup_dwmblocks() {
   local username="$1"
   arch-chroot /mnt sudo -i -u "$username" bash <<EOF
   echo -e "${blue}DWMBLOCKS${normal}"
-  git clone --depth=1 https://github.com/ghoulboii/dwmblocks.git ~/.local/src/dwmblocks
+  git clone --depth=1 https://github.com/ghoulboii/dwmblocks ~/.local/src/dwmblocks
+  git --git-dir=~/.local/src/dwmblocks/.git --work-tree=~/.local/src/dwmblocks remote set-url origin git@github.com:$(whoami)/dwmblocks
   sudo make -sC ~/.local/src/dwmblocks install
 EOF
 }
@@ -258,7 +261,8 @@ setup_st() {
   local username="$1"
   arch-chroot /mnt sudo -i -u "$username" bash <<EOF
   echo -e "${blue}ST${normal}"
-  git clone --depth=1 https://github.com/ghoulboii/st.git ~/.local/src/st
+  git clone --depth=1 https://github.com/ghoulboii/st ~/.local/src/st
+  git --git-dir=~/.local/src/st/.git --work-tree=~/.local/src/st remote set-url origin git@github.com:$(whoami)/st
   sudo make -sC ~/.local/src/st install
 EOF
 }
@@ -267,7 +271,8 @@ setup_dmenu() {
   local username="$1"
   arch-chroot /mnt sudo -i -u "$username" bash <<EOF
   echo -e "${blue}DMENU${normal}"
-  git clone --depth=1 https://github.com/ghoulboii/dmenu.git ~/.local/src/dmenu
+  git clone --depth=1 https://github.com/ghoulboii/dmenu ~/.local/src/dmenu
+  git --git-dir=~/.local/src/dmenu/.git --work-tree=~/.local/src/dmenu remote set-url origin git@github.com:$(whoami)/dmenu
   sudo make -sC ~/.local/src/dmenu install
 EOF
 }
@@ -276,7 +281,8 @@ setup_neovim() {
   local username="$1"
   arch-chroot /mnt sudo -i -u "$username" bash <<EOF
   echo -e "${blue}NEOVIM${normal}"
-  git clone --depth=1 https://github.com/ghoulboii/nvim.git ~/.config/nvim
+  git clone --depth=1 https://github.com/ghoulboii/nvim ~/.config/nvim
+  git --git-dir=~/.config/nvim/.git --work-tree=~/.config/nvim remote set-url origin git@github.com:$(whoami)/nvim
 EOF
 }
 
