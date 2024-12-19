@@ -182,13 +182,8 @@ create_user() {
   local username="$1"
   echo -e "${green}USER CREATION${normal}"
   arch-chroot /mnt systemctl enable NetworkManager libvirtd paccache.timer bluetooth ufw.service
-  arch-chroot /mnt useradd -mG wheel -s /bin/zsh username
-  arch-chroot /mnt usermod -aG libvirt username
-}
-
-pass_root() {
-  local pass="$1"
-  arch-chroot /mnt bash -c "echo root:$pass | chpasswd"
+  arch-chroot /mnt useradd -mG wheel -s /bin/zsh $username
+  arch-chroot /mnt usermod -aG libvirt $username
 }
 
 pass_user() {
@@ -216,13 +211,13 @@ setup_dotfiles() {
   arch-chroot /mnt sudo -i -u $username bash <<EOF
   cd
   git clone --depth=1 --separate-git-dir=.dots https://github.com/ghoulboii/dotfiles tmpdotfiles
-  git --git-dir=.dots --work-tree=~ remote set-url origin git@github.com:$(whoami)/dotfiles
+  git --git-dir=.dots --work-tree=~ remote set-url origin git@github.com:ghoulboii/dotfiles
   git --git-dir=.dots --work-tree=~ config --local status.showUntrackedFiles no
   rsync --recursive --verbose --exclude '.git' tmpdotfiles/ .
   rm -rf tmpdotfiles
   mkdir ~/{dl,doc,pics}
   xdg-user-dirs-update
-  echo 'ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"' > /etc/zsh/zshenv
+  echo 'ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"' > /etc/zsh/zshenv #TODO Check if this works
 EOF
 }
 
@@ -450,7 +445,6 @@ EOF
     echo -n .
     sleep 1
   done
-  clear
   echo -e "${blue}Part 2: Base System${normal}"
 
   install_base_pkg
@@ -458,7 +452,7 @@ EOF
   conf_locale_hosts "$hostname"
   install_grub "$efi" "$drive"
   create_user "$username"
-  pass_root "$pass"
+  pass_user "root" "$pass"
   pass_user "$username" "$pass"
   setup_ufw
 
@@ -468,7 +462,6 @@ EOF
     echo -n .
     sleep 1
   done
-  clear
   echo -e "${blue}Part 3: Graphical Interface${normal}"
 
   echo -e "$username ALL=(ALL) NOPASSWD: ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n" >>/mnt/etc/sudoers
