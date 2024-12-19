@@ -292,21 +292,18 @@ install_packages() {
     acpi
     bat
     btop
-    deno
     easyeffects
-    exa
+    # eza
     fastfetch
-    fd
+    # fd
     feh
     firefox
     fzf
-    jdk8-openjdk
-    jdk17-openjdk
     gamemode
-    gimp
     gparted
     lf
     libqalculate
+    libreoffice-fresh
     man-db
     mesa
     mpv
@@ -316,17 +313,16 @@ install_packages() {
     newsboat
     noto-fonts
     noto-fonts-emoji
-    npm
     obs-studio
     openssh
-    os-prober
+    os-prober # TODO: make dual boot function
     pavucontrol
     pacman-contrib
-    pcmanfm-gtk3
+    pcmanfm-gtk3 # TODO: checkout other file managers
     pipewire
     pipewire-pulse
     playerctl
-    prismlauncher-bin
+    prismlauncher
     python-pywal
     qbittorrent
     qt5-styleplugins
@@ -335,6 +331,8 @@ install_packages() {
     ripgrep
     rose-pine-gtk-theme
     socat
+    sxhkd
+    tgpt
     tldr
     tmux
     trash-cli
@@ -345,7 +343,6 @@ install_packages() {
     wine-staging
     winetricks
     wireplumber
-    xbindkeys
     xclip
     xdg-desktop-portal-gtk
     xdotool
@@ -356,8 +353,6 @@ install_packages() {
     xorg-xset
     xsel
     yt-dlp
-    zathura
-    zathura-pdf-mupdf
     zoxide
     zsh-autosuggestions
     zsh-completions
