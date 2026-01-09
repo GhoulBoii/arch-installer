@@ -1,0 +1,20 @@
+# Hyprland
+hyprland
+hyprlock
+hyprpolkitagent
+xdg-desktop-portal-hyprland
+
+# AUR
+blesh-git
+brave-bin
+dracula-gtk-theme
+duplicati-bin
+gamescope-git
+kanata-bin
+localsend-bin
+paru-bin
+spicetify-cli
+spicetify-marketplace-bin
+wayfreeze-git
+zen-browser-bin
+
