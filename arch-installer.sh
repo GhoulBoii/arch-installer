@@ -42,7 +42,6 @@ setup_aur() {
     return
   fi
   echo -e "${blue}AUR Helper${normal}"
-  sudo pacman -S --noconfirm --needed git base-devel
   git clone --depth=1 https://aur.archlinux.org/yay-bin.git ~/.local/src/aur_helper
   makepkg --clean --install --noconfirm --rmdeps --syncdeps --dir ~/.local/src/aur_helper
   rm -rf ~/.local/src/aur_helper
@@ -68,7 +67,6 @@ setup_firewall() {
 
 setup_dotfiles() {
   echo -e "${blue}DOTFILES${normal}"
-  sudo pacman -S --noconfirm --needed chezmoi
   chezmoi init --apply ksharizard
 }
 
@@ -78,7 +76,6 @@ setup_neovim() {
     return
   fi
   echo -e "${blue}NEOVIM${normal}"
-  sudo pacman -S --noconfirm --needed neovim
   git clone --depth=1 https://github.com/ghoulboii/nvim ~/.config/nvim
   git --git-dir=~/.config/nvim/.git --work-tree=~/.config/nvim remote set-url origin git@github.com:ghoulboii/nvim
 }

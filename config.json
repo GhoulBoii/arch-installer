@@ -43,7 +43,7 @@
         "type": "nm_iwd"
     },
     "ntp": true,
-    "packages": [],
+    "packages": ["base-devel", "chezmoi", "git", "neovim"],
     "parallel_downloads": 0,
     "profile_config": {
         "gfx_driver": null,
@@ -60,5 +60,9 @@
         "algorithm": "zstd",
         "enabled": true
     },
-    "version": "3.0.15"
+    "version": "3.0.15",
+    "custom-commands": [
+        "read -p \"Enter your username: \" u",
+        "curl https://raw.githubusercontent.com/ksharizard/arch-installer/refs/heads/master/arch-installer.sh | sudo -u \"$u\" bash"
+    ]
 }
